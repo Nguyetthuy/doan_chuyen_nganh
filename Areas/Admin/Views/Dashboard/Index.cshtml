@@ -1,0 +1,30 @@
+@{
+    ViewData["Title"] = "Duyệt hồ sơ";
+}
+@section Sidebar { @await Html.PartialAsync("_AdminSidebar") }
+<div class="row">
+    <div class="col-md-12">
+        <h2>Duyệt hồ sơ</h2>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Chờ duyệt</h5>
+                        <p class="card-text">Các hồ sơ đang chờ duyệt</p>
+                        <a href="#" class="btn btn-outline-primary">Duyệt</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Đã duyệt</h5>
+                        <p class="card-text">Quản lý các hồ sơ đã duyệt</p>
+                        <a href="#" class="btn btn-outline-primary">Xem</a>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</div>

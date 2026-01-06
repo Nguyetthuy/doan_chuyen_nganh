@@ -1,0 +1,249 @@
+@model List<finder_work.Models.Notification>
+
+@{
+    var unreadCount = ViewBag.UnreadCount ?? 0;
+    var hasNotifications = ViewBag.HasNotifications ?? false;
+}
+
+<div class="dropdown">
+    <button class="btn btn-outline-secondary position-relative" type="button" 
+            id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="bi bi-bell"></i>
+        @if (unreadCount > 0)
+        {
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger notification-badge">
+                @(unreadCount > 99 ? "99+" : unreadCount.ToString())
+                <span class="visually-hidden">thông báo chưa đọc</span>
+            </span>
+        }
+    </button>
+    
+    <div class="dropdown-menu dropdown-menu-end notification-dropdown" aria-labelledby="notificationDropdown">
+        <div class="dropdown-header d-flex justify-content-between align-items-center">
+            <h6 class="mb-0">Thông báo</h6>
+            @if (unreadCount > 0)
+            {
+                <span class="badge bg-primary">@unreadCount</span>
+            }
+        </div>
+        
+        @if (hasNotifications)
+        {
+            <div class="notification-list">
+                @foreach (var notification in Model)
+                {
+                    <div class="dropdown-item notification-dropdown-item @(!notification.IsRead ? "notification-unread" : "")" 
+                         data-id="@notification.NotificationId">
+                        <div class="d-flex align-items-start">
+                            <div class="notification-icon me-2">
+                                @switch (notification.Type.ToLower())
+                                {
+                                    case "success":
+                                    case "profileapproved":
+                                        <i class="bi bi-check-circle-fill text-success"></i>
+                                        break;
+                                    case "error":
+                                    case "profilerejected":
+                                        <i class="bi bi-x-circle-fill text-danger"></i>
+                                        break;
+                                    case "warning":
+                                        <i class="bi bi-exclamation-triangle-fill text-warning"></i>
+                                        break;
+                                    case "profilepending":
+                                        <i class="bi bi-clock-fill text-info"></i>
+                                        break;
+                                    default:
+                                        <i class="bi bi-info-circle-fill text-primary"></i>
+                                        break;
+                                }
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="notification-title">@notification.Title</div>
+                                <div class="notification-message">
+                                    @(notification.Message.Length > 60 ? notification.Message.Substring(0, 60) + "..." : notification.Message)
+                                </div>
+                                <div class="notification-time">
+                                    @GetTimeAgo(notification.CreatedDate)
+                                </div>
+                            </div>
+                            @if (!notification.IsRead)
+                            {
+                                <div class="notification-dot"></div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+            
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-footer">
+                <div class="d-flex justify-content-between">
+                    @if (unreadCount > 0)
+                    {
+                        <button type="button" class="btn btn-sm btn-outline-primary" id="markAllReadDropdown">
+                            Đánh dấu tất cả đã đọc
+                        </button>
+                    }
+                    <a href="@Url.Action("Index", "Notification")" class="btn btn-sm btn-primary">
+                        Xem tất cả
+                    </a>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="dropdown-item-text text-center py-4">
+                <i class="bi bi-bell-slash text-muted fs-1"></i>
+                <div class="text-muted mt-2">Chưa có thông báo</div>
+            </div>
+        }
+    </div>
+</div>
+
+@functions {
+    private string GetTimeAgo(DateTime dateTime)
+    {
+        var timeSpan = DateTime.UtcNow - dateTime;
+
+        if (timeSpan.TotalMinutes < 1)
+            return "Vừa xong";
+        if (timeSpan.TotalMinutes < 60)
+            return $"{(int)timeSpan.TotalMinutes}p";
+        if (timeSpan.TotalHours < 24)
+            return $"{(int)timeSpan.TotalHours}h";
+        if (timeSpan.TotalDays < 7)
+            return $"{(int)timeSpan.TotalDays}d";
+        
+        return dateTime.ToString("dd/MM");
+    }
+}
+
+<script>
+$(document).ready(function() {
+    // Mark notification as read when clicked
+    $('.notification-dropdown-item').on('click', function(e) {
+        var notificationId = $(this).data('id');
+        var $item = $(this);
+        
+        if (!$item.hasClass('notification-unread')) {
+            return;
+        }
+        
+        $.post('/Notification/MarkAsRead', { id: notificationId }, function(response) {
+            if (response.success) {
+                $item.removeClass('notification-unread');
+                $item.find('.notification-dot').remove();
+                updateNotificationBadge();
+            }
+        });
+    });
+    
+    // Mark all as read from dropdown
+    $('#markAllReadDropdown').on('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        $.post('/Notification/MarkAllAsRead', function(response) {
+            if (response.success) {
+                $('.notification-dropdown-item').removeClass('notification-unread');
+                $('.notification-dot').remove();
+                $('.notification-badge').hide();
+                $('#markAllReadDropdown').hide();
+                $('.badge.bg-primary').hide();
+            }
+        });
+    });
+});
+
+function updateNotificationBadge() {
+    $.get('/Notification/GetUnreadCount', function(response) {
+        if (response.success) {
+            var $badge = $('.notification-badge');
+            if (response.count > 0) {
+                $badge.text(response.count > 99 ? '99+' : response.count).show();
+            } else {
+                $badge.hide();
+            }
+        }
+    });
+}
+</script>
+
+<style>
+.notification-dropdown {
+    width: 350px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.notification-dropdown-item {
+    padding: 0.75rem 1rem;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.notification-dropdown-item:hover {
+    background-color: #f8f9fa;
+}
+
+.notification-unread {
+    background-color: #f0f8ff;
+    border-left: 3px solid #0d6efd;
+}
+
+.notification-icon {
+    font-size: 1.1rem;
+    min-width: 20px;
+}
+
+.notification-title {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #333;
+    margin-bottom: 0.25rem;
+}
+
+.notification-message {
+    font-size: 0.8rem;
+    color: #666;
+    margin-bottom: 0.25rem;
+    line-height: 1.3;
+}
+
+.notification-time {
+    font-size: 0.75rem;
+    color: #999;
+}
+
+.notification-dot {
+    width: 8px;
+    height: 8px;
+    background-color: #0d6efd;
+    border-radius: 50%;
+    margin-top: 0.25rem;
+}
+
+.notification-badge {
+    font-size: 0.7rem;
+    min-width: 18px;
+    height: 18px;
+}
+
+.dropdown-header {
+    padding: 0.75rem 1rem;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.dropdown-footer {
+    padding: 0.75rem 1rem;
+    background-color: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+}
+
+.notification-list {
+    max-height: 250px;
+    overflow-y: auto;
+}
+</style>

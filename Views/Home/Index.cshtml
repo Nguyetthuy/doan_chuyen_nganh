@@ -1,0 +1,345 @@
+@{
+    ViewData["Title"] = "Trang chủ";
+}
+
+<!-- Hero Section -->
+<section class="hero-section py-5">
+    <div class="container">
+        <div class="row align-items-center min-vh-50">
+            <div class="col-lg-6">
+                <div class="hero-content">
+                    <h1 class="display-4 fw-bold mb-4 text-gradient">
+                        Tìm kiếm hồ sơ <br>
+                        <span class="text-primary">ứng viên phù hợp</span>
+                    </h1>
+                    <p class="lead mb-4 text-muted">
+                        Khám phá hàng nghìn hồ sơ ứng viên tài năng với đầy đủ thông tin 
+                        kỹ năng, kinh nghiệm và bằng cấp chuyên nghiệp.
+                    </p>
+                
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="search-card p-4 bg-white rounded-4 shadow-lg">
+                    <h3 class="h4 mb-4 text-center">
+                        <i class="bi bi-person-search text-primary me-2"></i>
+                        Tìm kiếm hồ sơ ứng viên
+                    </h3>
+                    <form action="@Url.Action("Search", "Home")" method="get" id="searchForm">
+                        <div class="mb-3">
+                            <div class="input-group input-group-lg">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="bi bi-person text-muted"></i>
+                                </span>
+                                <input type="text" name="keyword" class="form-control border-start-0" 
+                                       placeholder="Tên ứng viên, kỹ năng, nghề nghiệp..." />
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="input-group input-group-lg">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="bi bi-geo-alt text-muted"></i>
+                                </span>
+                                <input type="text" name="location" class="form-control border-start-0" 
+                                       placeholder="Địa điểm làm việc..." />
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <select name="categoryId" class="form-select form-select-lg" id="categorySelect">
+                                <option value="">Tất cả ngành nghề</option>
+                                <!-- Categories will be loaded dynamically -->
+                            </select>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light">
+                                        <i class="bi bi-currency-dollar text-muted"></i>
+                                    </span>
+                                    <input type="number" name="minSalary" class="form-control" 
+                                           placeholder="Lương tối thiểu" min="0" step="1000000" />
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light">
+                                        <i class="bi bi-currency-dollar text-muted"></i>
+                                    </span>
+                                    <input type="number" name="maxSalary" class="form-control" 
+                                           placeholder="Lương tối đa" min="0" step="1000000" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-search me-2"></i>Tìm hồ sơ ngay
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- Categories Section -->
+<section class="py-5" id="categories">
+    <div class="container">
+        <div class="row mb-5">
+            <div class="col-12 text-center">
+                <h2 class="h1 fw-bold mb-3">Nhóm ngành nghề</h2>
+                <p class="lead text-muted">Khám phá hồ sơ ứng viên theo từng lĩnh vực chuyên môn</p>
+            </div>
+        </div>
+        
+        <div class="row" id="categoriesContainer">
+            <!-- Categories will be loaded here via AJAX -->
+            <div class="col-12 text-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Đang tải...</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-4">
+            <div class="col-12 text-center">
+                <a href="@Url.Action("Index", "Categories")" class="btn btn-primary btn-lg">
+                    <i class="bi bi-grid-3x3-gap me-2"></i>Xem tất cả nhóm ngành
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Profiles Section -->
+<section class="py-5 bg-light" id="profiles">
+    <div class="container">
+        <div class="row mb-5">
+            <div class="col-12 text-center">
+                <h2 class="h1 fw-bold mb-3">Hồ sơ ứng viên nổi bật</h2>
+                <p class="lead text-muted">Khám phá những ứng viên tài năng đã được duyệt</p>
+            </div>
+        </div>
+        
+        <div class="row" id="profilesContainer">
+            <!-- Profiles will be loaded here via AJAX -->
+            <div class="col-12 text-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Đang tải...</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-4">
+            <div class="col-12 text-center">
+                <a href="@Url.Action("Index", "Categories")" class="btn btn-primary btn-lg">
+                    <i class="bi bi-grid-3x3-gap me-2"></i>Xem tất cả hồ sơ
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Statistics Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-md-3 col-6 mb-4">
+                <div class="stat-card p-4">
+                    <div class="stat-icon mb-3">
+                        <i class="bi bi-people-fill text-primary display-4"></i>
+                    </div>
+                    <h3 class="h2 fw-bold text-primary" id="totalProfiles">0</h3>
+                    <p class="text-muted mb-0">Hồ sơ đã duyệt</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6 mb-4">
+                <div class="stat-card p-4">
+                    <div class="stat-icon mb-3">
+                        <i class="bi bi-briefcase-fill text-success display-4"></i>
+                    </div>
+                    <h3 class="h2 fw-bold text-success" id="totalCategories">0</h3>
+                    <p class="text-muted mb-0">Nhóm ngành</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6 mb-4">
+                <div class="stat-card p-4">
+                    <div class="stat-icon mb-3">
+                        <i class="bi bi-award-fill text-warning display-4"></i>
+                    </div>
+                    <h3 class="h2 fw-bold text-warning" id="totalSkills">0</h3>
+                    <p class="text-muted mb-0">Kỹ năng</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6 mb-4">
+                <div class="stat-card p-4">
+                    <div class="stat-icon mb-3">
+                        <i class="bi bi-geo-alt-fill text-info display-4"></i>
+                    </div>
+                    <h3 class="h2 fw-bold text-info" id="totalLocations">0</h3>
+                    <p class="text-muted mb-0">Địa điểm</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center">
+                <div class="cta-card p-5 rounded-4">
+                    <h2 class="h1 fw-bold mb-3 text-white">Sẵn sàng bắt đầu?</h2>
+                    <p class="lead mb-4 text-white-50">
+                        Đăng ký tài khoản miễn phí để tạo hồ sơ chuyên nghiệp
+                    </p>
+                    <div class="d-flex gap-3 justify-content-center">
+                        <a href="@Url.Action("Register", "Account")" class="btn btn-light btn-lg">
+                            <i class="bi bi-person-plus me-2"></i>Đăng ký ngay
+                        </a>
+                        <a href="@Url.Action("Login", "Account")" class="btn btn-outline-light btn-lg">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>Đăng nhập
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+<script>
+$(document).ready(function() {
+    // Load categories for search dropdown
+    loadCategoriesForSearch();
+    
+    // Load categories with profile counts
+    loadCategories();
+    
+    // Load featured profiles - check if there's a page parameter in URL
+    var urlParams = new URLSearchParams(window.location.search);
+    var currentPage = parseInt(urlParams.get('page')) || 1;
+    loadFeaturedProfiles(currentPage);
+    
+    // Load statistics
+    loadStatistics();
+});
+
+function loadCategoriesForSearch() {
+    $.get('/Home/GetAllCategories', function(data) {
+        if (data && data.length > 0) {
+            let options = '<option value="">Tất cả ngành nghề</option>';
+            data.forEach(function(category) {
+                options += `<option value="${category.categoryId}">${category.categoryName}</option>`;
+            });
+            $('#categorySelect').html(options);
+        }
+    });
+}
+
+function loadCategories() {
+    $.get('/Home/GetCategoriesWithProfiles', function(data) {
+        if (data && data.length > 0) {
+            let html = '';
+            // Show only top 6 categories
+            data.slice(0, 6).forEach(function(category) {
+                html += `
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="card category-card h-100 border-0 shadow-sm">
+                            <div class="card-body p-4">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div class="category-icon">
+                                        <i class="bi bi-folder-fill text-primary fs-1"></i>
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="badge bg-primary rounded-pill fs-6">
+                                            ${category.profileCount}
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <h5 class="card-title fw-bold mb-2">${category.categoryName}</h5>
+                                
+                                ${category.categoryDescription ? `<p class="card-text text-muted mb-3">${category.categoryDescription}</p>` : ''}
+                                
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">
+                                        ${category.profileCount} hồ sơ có sẵn
+                                    </small>
+                                    <a href="/Categories/Profiles?categoryId=${category.categoryId}&categoryName=${encodeURIComponent(category.categoryName)}" 
+                                       class="btn btn-outline-primary btn-sm">
+                                        <i class="bi bi-arrow-right me-1"></i>Xem hồ sơ
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            $('#categoriesContainer').html(html);
+        } else {
+            $('#categoriesContainer').html('<div class="col-12 text-center"><p class="text-muted">Chưa có danh mục nào có hồ sơ</p></div>');
+        }
+    }).fail(function() {
+        $('#categoriesContainer').html('<div class="col-12 text-center"><p class="text-muted">Không thể tải danh mục</p></div>');
+    });
+}
+
+function loadFeaturedProfiles(page = 1) {
+    // Show loading indicator
+    $('#profilesContainer').html('<div class="col-12 text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Đang tải...</span></div></div>');
+    
+    $.get('/Home/GetFeaturedProfiles', { page: page }, function(data) {
+        $('#profilesContainer').html(data);
+        
+        // Bind pagination events
+        bindPaginationEvents();
+        
+        // Update URL without page reload
+        if (page > 1) {
+            window.history.pushState({page: page}, '', '?page=' + page);
+        } else {
+            window.history.pushState({page: 1}, '', window.location.pathname);
+        }
+    }).fail(function() {
+        $('#profilesContainer').html('<div class="col-12 text-center"><p class="text-muted">Không thể tải hồ sơ</p></div>');
+    });
+}
+
+function bindPaginationEvents() {
+    // Handle pagination clicks
+    $('.pagination .page-link').off('click').on('click', function(e) {
+        e.preventDefault();
+        
+        var $this = $(this);
+        var page = $this.data('page');
+        
+        // Don't do anything if disabled or current page
+        if ($this.parent().hasClass('disabled') || $this.parent().hasClass('active')) {
+            return;
+        }
+        
+        if (page && page > 0) {
+            loadFeaturedProfiles(page);
+        }
+    });
+}
+
+// Handle browser back/forward buttons
+window.addEventListener('popstate', function(event) {
+    var page = event.state ? event.state.page : 1;
+    loadFeaturedProfiles(page);
+});
+
+function loadStatistics() {
+    $.get('/Home/GetStatistics', function(data) {
+        $('#totalProfiles').text(data.totalProfiles);
+        $('#totalCategories').text(data.totalCategories);
+        $('#totalSkills').text(data.totalSkills);
+        $('#totalLocations').text(data.totalLocations);
+    });
+}
+</script>
+}

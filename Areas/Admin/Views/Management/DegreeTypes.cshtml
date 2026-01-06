@@ -1,0 +1,169 @@
+@model IEnumerable<finder_work.Models.DegreeType>
+@section Sidebar { @await Html.PartialAsync("_AdminSidebar") }
+
+<div class="container-fluid">
+    <h2>Quản lý loại bằng cấp</h2>
+    
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Add New Degree Type Form -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Thêm loại bằng cấp mới</h5>
+        </div>
+        <div class="card-body">
+            <form action="/Admin/Management/CreateDegreeType" method="post">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="mb-3">
+                            <label for="degreeTypeName" class="form-label">Tên loại bằng cấp</label>
+                            <input type="text" class="form-control" id="degreeTypeName" name="degreeTypeName" required>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label">&nbsp;</label>
+                            <button type="submit" class="btn btn-primary d-block">Thêm loại bằng cấp</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Degree Types List -->
+    <div class="card">
+        <div class="card-header">
+            <h5>Danh sách loại bằng cấp</h5>
+        </div>
+        <div class="card-body">
+            @if (Model != null && Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Tên loại bằng cấp</th>
+                                <th>Số lượng bằng cấp</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var degreeType in Model)
+                            {
+                                <tr>
+                                    <td>@degreeType.DegreeTypeId</td>
+                                    <td>@degreeType.DegreeTypeName</td>
+                                    <td>@degreeType.Degrees.Count</td>
+                                    <td>
+                                        <button type="button" class="btn btn-sm btn-warning me-1" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#editModal@(degreeType.DegreeTypeId)">
+                                            <i class="fas fa-edit"></i> Sửa
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-danger" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#deleteModal@(degreeType.DegreeTypeId)">
+                                            <i class="fas fa-trash"></i> Xóa
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-4">
+                    <p class="text-muted">Chưa có loại bằng cấp nào được tạo.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Edit and Delete Modals -->
+@if (Model != null && Model.Any())
+{
+    @foreach (var degreeType in Model)
+    {
+        <!-- Edit Modal -->
+        <div class="modal fade" id="editModal@(degreeType.DegreeTypeId)" tabindex="-1" aria-labelledby="editModalLabel@(degreeType.DegreeTypeId)" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editModalLabel@(degreeType.DegreeTypeId)">Sửa loại bằng cấp</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form action="/Admin/Management/UpdateDegreeType" method="post">
+                        <div class="modal-body">
+                            <input type="hidden" name="degreeTypeId" value="@degreeType.DegreeTypeId" />
+                            <div class="mb-3">
+                                <label for="degreeTypeName@(degreeType.DegreeTypeId)" class="form-label">Tên loại bằng cấp</label>
+                                <input type="text" class="form-control" id="degreeTypeName@(degreeType.DegreeTypeId)" 
+                                       name="degreeTypeName" value="@degreeType.DegreeTypeName" required>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                            <button type="submit" class="btn btn-primary">Cập nhật</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Modal -->
+        <div class="modal fade" id="deleteModal@(degreeType.DegreeTypeId)" tabindex="-1" aria-labelledby="deleteModalLabel@(degreeType.DegreeTypeId)" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="deleteModalLabel@(degreeType.DegreeTypeId)">Xác nhận xóa</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Bạn có chắc chắn muốn xóa loại bằng cấp "<strong>@degreeType.DegreeTypeName</strong>" không?</p>
+                        @if (degreeType.Degrees.Count > 0)
+                        {
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                Loại bằng cấp này có <strong>@degreeType.Degrees.Count</strong> bằng cấp liên quan. 
+                                Bạn cần xóa các bằng cấp trước khi xóa loại bằng cấp này.
+                            </div>
+                        }
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        @if (degreeType.Degrees.Count == 0)
+                        {
+                            <form action="/Admin/Management/DeleteDegreeType" method="post" style="display: inline;">
+                                <input type="hidden" name="degreeTypeId" value="@degreeType.DegreeTypeId" />
+                                <button type="submit" class="btn btn-danger">Xóa</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <button type="button" class="btn btn-danger" disabled>Không thể xóa</button>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+}

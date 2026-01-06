@@ -1,0 +1,46 @@
+@{
+    var currentPage = ViewBag.CurrentPage ?? 1;
+    var totalPages = ViewBag.TotalPages ?? 1;
+    var totalProfiles = ViewBag.TotalProfiles ?? 0;
+    var hasPreviousPage = ViewBag.HasPreviousPage ?? false;
+    var hasNextPage = ViewBag.HasNextPage ?? false;
+}
+
+@if (totalPages > 1)
+{
+    <div class="d-flex justify-content-between align-items-center mt-4">
+        <!-- Page Info -->
+        <div class="text-muted">
+            Hiển thị trang @currentPage / @totalPages (Tổng @totalProfiles hồ sơ)
+        </div>
+        
+        <!-- Pagination Controls -->
+        <nav aria-label="Phân trang hồ sơ">
+            <ul class="pagination mb-0">
+                <!-- Previous Button -->
+                <li class="page-item @(!hasPreviousPage ? "disabled" : "")">
+                    <a class="page-link" href="#" data-page="@(currentPage - 1)" 
+                       @(!hasPreviousPage ? "tabindex=\"-1\" aria-disabled=\"true\"" : "")>
+                        <i class="bi bi-chevron-left"></i> Trước
+                    </a>
+                </li>
+                
+                <!-- Page Numbers -->
+                @for (int i = 1; i <= totalPages; i++)
+                {
+                    <li class="page-item @(i == currentPage ? "active" : "")">
+                        <a class="page-link" href="#" data-page="@i">@i</a>
+                    </li>
+                }
+                
+                <!-- Next Button -->
+                <li class="page-item @(!hasNextPage ? "disabled" : "")">
+                    <a class="page-link" href="#" data-page="@(currentPage + 1)"
+                       @(!hasNextPage ? "tabindex=\"-1\" aria-disabled=\"true\"" : "")>
+                        Tiếp <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+}

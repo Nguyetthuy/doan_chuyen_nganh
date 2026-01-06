@@ -1,0 +1,312 @@
+@model finder_work.Models.UserProfile
+@section Sidebar { @await Html.PartialAsync("_AdminSidebar") }
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Chi tiết hồ sơ - @Model.User?.FullName</h2>
+        <a href="@Url.Action("JobProfiles")" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Quay lại
+        </a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row">
+        <!-- Profile Status Card -->
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Trạng thái hồ sơ</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <strong>Trạng thái:</strong>
+                        @switch (Model.ApprovalStatus)
+                        {
+                            case "Approved":
+                                <span class="badge bg-success ms-2">Đã duyệt</span>
+                                break;
+                            case "Rejected":
+                                <span class="badge bg-danger ms-2">Từ chối</span>
+                                break;
+                            default:
+                                <span class="badge bg-warning ms-2">Chờ duyệt</span>
+                                break;
+                        }
+                    </div>
+
+                    @if (Model.ApprovedDate.HasValue)
+                    {
+                        <div class="mb-3">
+                            <strong>Ngày duyệt:</strong> @Model.ApprovedDate.Value.ToString("dd/MM/yyyy HH:mm")
+                        </div>
+                    }
+
+                    @if (Model.ApprovedByUser != null)
+                    {
+                        <div class="mb-3">
+                            <strong>Người duyệt:</strong> @Model.ApprovedByUser.FullName
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrEmpty(Model.RejectionReason))
+                    {
+                        <div class="mb-3">
+                            <strong>Lý do từ chối:</strong>
+                            <div class="alert alert-warning mt-2">
+                                @Model.RejectionReason
+                            </div>
+                        </div>
+                    }
+
+                    <div class="mb-3">
+                        <strong>Ngày tạo:</strong> @Model.CreatedDate.ToString("dd/MM/yyyy HH:mm")
+                    </div>
+
+                    <div class="mb-3">
+                        <strong>Cập nhật lần cuối:</strong> @Model.UpdatedDate.ToString("dd/MM/yyyy HH:mm")
+                    </div>
+
+                    @if (Model.ApprovalStatus == "Pending")
+                    {
+                        <div class="d-grid gap-2">
+                            <form method="post" action="@Url.Action("ApproveProfile")" class="d-inline">
+                                <input type="hidden" name="profileId" value="@Model.ProfileId" />
+                                <button type="submit" class="btn btn-success w-100" 
+                                        onclick="return confirm('Bạn có chắc muốn duyệt hồ sơ này?')">
+                                    <i class="bi bi-check-circle"></i> Duyệt hồ sơ
+                                </button>
+                            </form>
+                            
+                            <button type="button" class="btn btn-danger w-100" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#rejectModal">
+                                <i class="bi bi-x-circle"></i> Từ chối hồ sơ
+                            </button>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Details -->
+        <div class="col-md-8">
+            <!-- Personal Information -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Thông tin cá nhân</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Họ tên:</strong> @Model.User?.FullName</p>
+                            <p><strong>Email:</strong> @Model.User?.Email</p>
+                            <p><strong>Số điện thoại:</strong> @Model.User?.PhoneNumber</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Địa điểm làm việc:</strong> @Model.Location</p>
+                            <p><strong>Mức lương mong muốn:</strong> 
+                                @if (Model.ExpectedSalary.HasValue)
+                                {
+                                    @(Model.ExpectedSalary.Value.ToString("N0") + " VND")
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Chưa cập nhật</span>
+                                }
+                            </p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <p><strong>Tóm tắt:</strong></p>
+                            <div class="border p-3 bg-light">
+                                @Model.Summary
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Skills -->
+            @if (Model.UserProfileSkills?.Any() == true)
+            {
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5>Kỹ năng</h5>
+                    </div>
+                    <div class="card-body">
+                        @foreach (var skill in Model.UserProfileSkills)
+                        {
+                            <span class="badge bg-info me-2 mb-2">
+                                @skill.Skill?.SkillName
+                                @if (skill.Skill?.SkillType != null)
+                                {
+                                    <small>(@skill.Skill.SkillType.SkillTypeName)</small>
+                                }
+                            </span>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- Professions -->
+            @if (Model.UserProfileProfessions?.Any() == true)
+            {
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5>Ngành nghề quan tâm</h5>
+                    </div>
+                    <div class="card-body">
+                        @foreach (var profession in Model.UserProfileProfessions)
+                        {
+                            <span class="badge bg-secondary me-2 mb-2">
+                                @profession.Profession?.ProfessionName
+                                @if (profession.Profession?.Category != null)
+                                {
+                                    <small>(@profession.Profession.Category.CategoryName)</small>
+                                }
+                            </span>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- Work Experience -->
+            @if (Model.WorkExperiences?.Any() == true)
+            {
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5>Kinh nghiệm làm việc</h5>
+                    </div>
+                    <div class="card-body">
+                        @foreach (var work in Model.WorkExperiences.OrderByDescending(w => w.StartDate))
+                        {
+                            <div class="border-bottom pb-3 mb-3">
+                                <h6>@work.WorkName tại @work.CompanyName</h6>
+                                <p class="text-muted mb-1">
+                                    @work.StartDate?.ToString("MM/yyyy") - 
+                                    @(work.EndDate?.ToString("MM/yyyy") ?? "Hiện tại")
+                                    @if (work.WorkType != null)
+                                    {
+                                        <span class="badge bg-light text-dark ms-2">@work.WorkType.WorkTypeName</span>
+                                    }
+                                </p>
+                                @if (!string.IsNullOrEmpty(work.WorkDescription))
+                                {
+                                    <p>@work.WorkDescription</p>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- Education -->
+            @if (Model.Degrees?.Any() == true)
+            {
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5>Học vấn</h5>
+                    </div>
+                    <div class="card-body">
+                        @foreach (var degree in Model.Degrees.OrderByDescending(d => d.GraduationYear))
+                        {
+                            <div class="border-bottom pb-3 mb-3">
+                                <h6>@degree.DegreeName</h6>
+                                <p class="text-muted mb-1">
+                                    @degree.SchoolName
+                                    @if (degree.GraduationYear.HasValue)
+                                    {
+                                        <span> - @degree.GraduationYear</span>
+                                    }
+                                    @if (degree.DegreeType != null)
+                                    {
+                                        <span class="badge bg-light text-dark ms-2">@degree.DegreeType.DegreeTypeName</span>
+                                    }
+                                </p>
+                                @if (!string.IsNullOrEmpty(degree.Major))
+                                {
+                                    <p><strong>Chuyên ngành:</strong> @degree.Major</p>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- Certificates -->
+            @if (Model.Certificates?.Any() == true)
+            {
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5>Chứng chỉ</h5>
+                    </div>
+                    <div class="card-body">
+                        @foreach (var cert in Model.Certificates.OrderByDescending(c => c.IssueDate))
+                        {
+                            <div class="border-bottom pb-3 mb-3">
+                                <h6>@cert.CertificateName</h6>
+                                <p class="text-muted mb-1">
+                                    Cấp bởi: @cert.IssueBy
+                                    @if (cert.CertificateType != null)
+                                    {
+                                        <span class="badge bg-light text-dark ms-2">@cert.CertificateType.CertificateTypeName</span>
+                                    }
+                                </p>
+                                <p class="text-muted">
+                                    Ngày cấp: @cert.IssueDate?.ToString("dd/MM/yyyy")
+                                    @if (cert.ExpiryDate.HasValue)
+                                    {
+                                        <span> - Hết hạn: @cert.ExpiryDate.Value.ToString("dd/MM/yyyy")</span>
+                                    }
+                                </p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Reject Modal -->
+<div class="modal fade" id="rejectModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" action="@Url.Action("RejectProfile")">
+                <div class="modal-header">
+                    <h5 class="modal-title">Từ chối hồ sơ</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="profileId" value="@Model.ProfileId" />
+                    <p>Bạn có chắc muốn từ chối hồ sơ của <strong>@Model.User?.FullName</strong>?</p>
+                    <div class="mb-3">
+                        <label for="rejectionReason" class="form-label">Lý do từ chối:</label>
+                        <textarea class="form-control" name="rejectionReason" id="rejectionReason" 
+                                  rows="3" placeholder="Nhập lý do từ chối hồ sơ..." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-danger">Từ chối hồ sơ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

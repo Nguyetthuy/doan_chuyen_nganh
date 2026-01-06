@@ -1,0 +1,141 @@
+{
+  "SerializedFilePath": "d:\\do_an_chuyen_nganh\\finder_work\\obj\\Debug\\net8.0\\project.razor.json",
+  "FilePath": "d:\\do_an_chuyen_nganh\\finder_work\\finder_work.csproj",
+  "Configuration": {
+    "ConfigurationName": "MVC-3.0",
+    "LanguageVersion": "8.0",
+    "Extensions": [
+      {
+        "ExtensionName": "MVC-3.0"
+      }
+    ]
+  },
+  "ProjectWorkspaceState": {
+    "TagHelpers": [],
+    "CSharpLanguageVersion": 1200
+  },
+  "RootNamespace": "finder_work",
+  "Documents": [
+    {
+      "FilePath": "d:\\do_an_chuyen_nganh\\finder_work\\Areas\\Admin\\Views\\_ViewStart.cshtml",
+      "TargetPath": "Areas\\Admin\\Views\\_ViewStart.cshtml",
+      "FileKind": "mvc"
+    },
+    {
+      "FilePath": "d:\\do_an_chuyen_nganh\\finder_work\\Areas\\Admin\\Views\\Management\\Categories.cshtml",
+      "TargetPath": "Areas\\Admin\\Views\\Management\\Categories.cshtml",
+      "FileKind": "mvc"
+    },
+    {
+      "FilePath": "d:\\do_an_chuyen_nganh\\finder_work\\Areas\\Admin\\Views\\Management\\JobProfiles.cshtml",
+      "TargetPath": "Areas\\Admin\\Views\\Management\\JobProfiles.cshtml",
+      "FileKind": "mvc"
+    },
+    {
+      "FilePath": "d:\\do_an_chuyen_nganh\\finder_work\\Views\\Home\\Index.cshtml",
+      "TargetPath": "Views\\Home\\Index.cshtml",
+      "FileKind": "mvc"
+    },
+    {
+      "FilePath": "d:\\do_an_chuyen_nganh\\finder_work\\Areas\\Admin\\Views\\Management\\Skills.cshtml",
+      "TargetPath": "Areas\\Admin\\Views\\Management\\Skills.cshtml",
+      "FileKind": "mvc"
+    },
+    {
+      "FilePath": "d:\\do_an_chuyen_nganh\\finder_work\\Views\\Shared\\_Header.cshtml",
+      "TargetPath": "Views\\Shared\\_Header.cshtml",
+      "FileKind": "mvc"
+    },
+    {
+      "FilePath": "d:\\do_an_chuyen_nganh\\finder_work\\Views\\_ViewImports.cshtml",
+      "TargetPath": "Views\\_ViewImports.cshtml",
+      "FileKind": "mvc"
+    },
+    {
+      "FilePath": "d:\\do_an_chuyen_nganh\\finder_work\\Views\\Account\\AccessDenied.cshtml",
+      "TargetPath": "Views\\Account\\AccessDenied.cshtml",
+      "FileKind": "mvc"
+    },
+    {
+      "FilePath": "d:\\do_an_chuyen_nganh\\finder_work\\Areas\\Admin\\Views\\Management\\CertificateTypes.cshtml",
+      "TargetPath": "Areas\\Admin\\Views\\Management\\CertificateTypes.cshtml",
+      "FileKind": "mvc"
+    },
+    {
+      "FilePath": "d:\\do_an_chuyen_nganh\\finder_work\\Areas\\Admin\\Views\\Management\\WorkExperiences.cshtml",
+      "TargetPath": "Areas\\Admin\\Views\\Management\\WorkExperiences.cshtml",
+      "FileKind": "mvc"
+    },
+    {
+      "FilePath": "d:\\do_an_chuyen_nganh\\finder_work\\Areas\\Admin\\Views\\Management\\JobSeekerStats.cshtml",
+      "TargetPath": "Areas\\Admin\\Views\\Management\\JobSeekerStats.cshtml",
+      "FileKind": "mvc"
+    },
+    {
+      "FilePath": "d:\\do_an_chuyen_nganh\\finder_work\\Views\\Shared\\_ValidationScriptsPartial.cshtml",
+      "TargetPath": "Views\\Shared\\_ValidationScriptsPartial.cshtml",
+      "FileKind": "mvc"
+    },
+    {
+      "FilePath": "d:\\do_an_chuyen_nganh\\finder_work\\Areas\\Admin\\Views\\Management\\Professions.cshtml",
+      "TargetPath": "Areas\\Admin\\Views\\Management\\Professions.cshtml",
+      "FileKind": "mvc"
+    },
+    {
+      "FilePath": "d:\\do_an_chuyen_nganh\\finder_work\\Areas\\Admin\\Views\\Dashboard\\Index.cshtml",
+      "TargetPath": "Areas\\Admin\\Views\\Dashboard\\Index.cshtml",
+      "FileKind": "mvc"
+    },
+    {
+      "FilePath": "d:\\do_an_chuyen_nganh\\finder_work\\Views\\Shared\\_AdminSidebar.cshtml",
+      "TargetPath": "Views\\Shared\\_AdminSidebar.cshtml",
+      "FileKind": "mvc"
+    },
+    {
+      "FilePath": "d:\\do_an_chuyen_nganh\\finder_work\\Views\\Shared\\_Layout.cshtml",
+      "TargetPath": "Views\\Shared\\_Layout.cshtml",
+      "FileKind": "mvc"
+    },
+    {
+      "FilePath": "d:\\do_an_chuyen_nganh\\finder_work\\Views\\_ViewStart.cshtml",
+      "TargetPath": "Views\\_ViewStart.cshtml",
+      "FileKind": "mvc"
+    },
+    {
+      "FilePath": "d:\\do_an_chuyen_nganh\\finder_work\\Views\\Shared\\Error.cshtml",
+      "TargetPath": "Views\\Shared\\Error.cshtml",
+      "FileKind": "mvc"
+    },
+    {
+      "FilePath": "d:\\do_an_chuyen_nganh\\finder_work\\Areas\\Admin\\Views\\Management\\DegreeTypes.cshtml",
+      "TargetPath": "Areas\\Admin\\Views\\Management\\DegreeTypes.cshtml",
+      "FileKind": "mvc"
+    },
+    {
+      "FilePath": "d:\\do_an_chuyen_nganh\\finder_work\\Areas\\Admin\\Views\\Management\\UserAccounts.cshtml",
+      "TargetPath": "Areas\\Admin\\Views\\Management\\UserAccounts.cshtml",
+      "FileKind": "mvc"
+    },
+    {
+      "FilePath": "d:\\do_an_chuyen_nganh\\finder_work\\Views\\Account\\Register.cshtml",
+      "TargetPath": "Views\\Account\\Register.cshtml",
+      "FileKind": "mvc"
+    },
+    {
+      "FilePath": "d:\\do_an_chuyen_nganh\\finder_work\\Views\\Shared\\_Footer.cshtml",
+      "TargetPath": "Views\\Shared\\_Footer.cshtml",
+      "FileKind": "mvc"
+    },
+    {
+      "FilePath": "d:\\do_an_chuyen_nganh\\finder_work\\Views\\Home\\Privacy.cshtml",
+      "TargetPath": "Views\\Home\\Privacy.cshtml",
+      "FileKind": "mvc"
+    },
+    {
+      "FilePath": "d:\\do_an_chuyen_nganh\\finder_work\\Views\\Account\\Login.cshtml",
+      "TargetPath": "Views\\Account\\Login.cshtml",
+      "FileKind": "mvc"
+    }
+  ],
+  "SerializationFormat": "0.3"
+}

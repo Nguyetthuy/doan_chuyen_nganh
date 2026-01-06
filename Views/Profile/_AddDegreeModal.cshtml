@@ -1,0 +1,89 @@
+@model finder_work.Models.UserProfile
+
+<!-- Add Degree Modal -->
+<div class="modal fade" id="addDegreeModal" tabindex="-1" aria-labelledby="addDegreeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addDegreeModalLabel">
+                    <i class="fas fa-graduation-cap"></i> Thêm bằng cấp
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="AddDegree" method="post" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <input type="hidden" name="profileId" value="@(Model?.ProfileId ?? 0)" />
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="degreeName" class="form-label">Tên bằng cấp *</label>
+                                <input type="text" class="form-control" name="degreeName" required 
+                                       placeholder="Ví dụ: Cử nhân Công nghệ thông tin">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="degreeTypeId" class="form-label">Loại bằng cấp</label>
+                                <select class="form-select" name="degreeTypeId">
+                                    <option value="">Chọn loại bằng cấp</option>
+                                    @if (ViewBag.DegreeTypes != null)
+                                    {
+                                        @foreach (var degreeType in (List<finder_work.Models.DegreeType>)ViewBag.DegreeTypes)
+                                        {
+                                            <option value="@degreeType.DegreeTypeId">@degreeType.DegreeTypeName</option>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <option value="">Không có dữ liệu loại bằng cấp</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="major" class="form-label">Chuyên ngành *</label>
+                                <input type="text" class="form-control" name="major" 
+                                       placeholder="Ví dụ: Công nghệ phần mềm">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="schoolName" class="form-label">Tên trường *</label>
+                                <input type="text" class="form-control" name="schoolName" required 
+                                       placeholder="Ví dụ: Đại học Bách khoa Hà Nội">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="graduationYear" class="form-label">Năm tốt nghiệp</label>
+                                <input type="number" class="form-control" name="graduationYear" min="1950" max="2030" 
+                                       placeholder="Ví dụ: 2023">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="degreeImage" class="form-label">Ảnh bằng cấp</label>
+                                <input type="file" class="form-control" name="degreeImage" accept="image/*,application/pdf">
+                                <div class="form-text">Tải lên ảnh bằng cấp (tùy chọn)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save"></i> Thêm bằng cấp
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

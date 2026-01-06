@@ -1,0 +1,470 @@
+@model List<finder_work.Models.UserProfile>
+
+@{
+    ViewData["Title"] = "Kết quả tìm kiếm";
+    var searchParams = ViewBag.SearchParams as dynamic;
+    var currentPage = ViewBag.CurrentPage ?? 1;
+    var totalPages = ViewBag.TotalPages ?? 1;
+    var totalResults = ViewBag.TotalResults ?? 0;
+    var hasResults = Model != null && Model.Any();
+}
+
+<div class="container mt-4">
+    <!-- Search Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="h3 mb-2">
+                        <i class="bi bi-search me-2"></i>Kết quả tìm kiếm
+                    </h2>
+                    <p class="text-muted mb-0">
+                        Tìm thấy <strong>@totalResults</strong> hồ sơ phù hợp
+                        @if (searchParams != null && !string.IsNullOrEmpty(searchParams.Keyword))
+                        {
+                            <span>cho từ khóa "<strong>@searchParams.Keyword</strong>"</span>
+                        }
+                    </p>
+                </div>
+                <a href="@Url.Action("Index", "Home")" class="btn btn-outline-primary">
+                    <i class="bi bi-arrow-left me-2"></i>Quay lại trang chủ
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Filters -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-funnel me-2"></i>Bộ lọc tìm kiếm
+                        <button class="btn btn-sm btn-outline-secondary float-end" type="button" 
+                                data-bs-toggle="collapse" data-bs-target="#searchFilters">
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                    </h5>
+                </div>
+                <div class="collapse show" id="searchFilters">
+                    <div class="card-body">
+                        <form action="@Url.Action("Search", "Home")" method="get" id="searchForm">
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">Từ khóa</label>
+                                    <input type="text" name="keyword" class="form-control" 
+                                           value="@(searchParams?.Keyword ?? "")" 
+                                           placeholder="Tên, kỹ năng, nghề nghiệp..." />
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">Địa điểm</label>
+                                    <input type="text" name="location" class="form-control" 
+                                           value="@(searchParams?.Location ?? "")" 
+                                           placeholder="Thành phố, tỉnh..." />
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">Ngành nghề</label>
+                                    <select name="categoryId" class="form-select" id="categorySelect">
+                                        <option value="">Tất cả ngành nghề</option>
+                                        <!-- Categories will be loaded dynamically -->
+                                    </select>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">Mức lương</label>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <input type="number" name="minSalary" class="form-control form-control-sm" 
+                                                   value="@(searchParams?.MinSalary ?? "")" 
+                                                   placeholder="Từ" min="0" step="1000000" />
+                                        </div>
+                                        <div class="col-6">
+                                            <input type="number" name="maxSalary" class="form-control form-control-sm" 
+                                                   value="@(searchParams?.MaxSalary ?? "")" 
+                                                   placeholder="Đến" min="0" step="1000000" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12">
+                                    <button type="submit" class="btn btn-primary me-2">
+                                        <i class="bi bi-search me-2"></i>Tìm kiếm
+                                    </button>
+                                    <a href="@Url.Action("Search", "Home")" class="btn btn-outline-secondary">
+                                        <i class="bi bi-arrow-clockwise me-2"></i>Xóa bộ lọc
+                                    </a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Filters Display -->
+    @if (searchParams != null && (!string.IsNullOrEmpty(searchParams.Keyword) || !string.IsNullOrEmpty(searchParams.Location) || 
+         (searchParams.CategoryId != null && searchParams.CategoryId > 0) || 
+         searchParams.MinSalary != null || searchParams.MaxSalary != null))
+    {
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    <span class="text-muted">Bộ lọc đang áp dụng:</span>
+                    
+                    @if (!string.IsNullOrEmpty(searchParams.Keyword))
+                    {
+                        <span class="badge bg-primary">
+                            Từ khóa: @searchParams.Keyword
+                            <a href="@Url.Action("Search", "Home", new { 
+                                location = searchParams.Location, 
+                                categoryId = searchParams.CategoryId, 
+                                minSalary = searchParams.MinSalary, 
+                                maxSalary = searchParams.MaxSalary 
+                            })" class="text-white ms-1">×</a>
+                        </span>
+                    }
+                    
+                    @if (!string.IsNullOrEmpty(searchParams.Location))
+                    {
+                        <span class="badge bg-info">
+                            Địa điểm: @searchParams.Location
+                            <a href="@Url.Action("Search", "Home", new { 
+                                keyword = searchParams.Keyword, 
+                                categoryId = searchParams.CategoryId, 
+                                minSalary = searchParams.MinSalary, 
+                                maxSalary = searchParams.MaxSalary 
+                            })" class="text-white ms-1">×</a>
+                        </span>
+                    }
+                    
+                    @if (searchParams.CategoryId != null && searchParams.CategoryId > 0)
+                    {
+                        <span class="badge bg-success">
+                            Ngành: @ViewBag.CategoryName
+                            <a href="@Url.Action("Search", "Home", new { 
+                                keyword = searchParams.Keyword, 
+                                location = searchParams.Location, 
+                                minSalary = searchParams.MinSalary, 
+                                maxSalary = searchParams.MaxSalary 
+                            })" class="text-white ms-1">×</a>
+                        </span>
+                    }
+                    
+                    @if (searchParams.MinSalary != null || searchParams.MaxSalary != null)
+                    {
+                        <span class="badge bg-warning">
+                            Lương: 
+                            @if (searchParams.MinSalary != null && searchParams.MaxSalary != null)
+                            {
+                                @($"{searchParams.MinSalary:N0} - {searchParams.MaxSalary:N0} VND")
+                            }
+                            else if (searchParams.MinSalary != null)
+                            {
+                                @($"Từ {searchParams.MinSalary:N0} VND")
+                            }
+                            else if (searchParams.MaxSalary != null)
+                            {
+                                @($"Đến {searchParams.MaxSalary:N0} VND")
+                            }
+                            <a href="@Url.Action("Search", "Home", new { 
+                                keyword = searchParams.Keyword, 
+                                location = searchParams.Location, 
+                                categoryId = searchParams.CategoryId 
+                            })" class="text-white ms-1">×</a>
+                        </span>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Search Results -->
+    @if (hasResults)
+    {
+        <div class="row">
+            @foreach (var profile in Model)
+            {
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="card profile-card h-100 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <!-- Profile Header -->
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="profile-avatar me-3">
+                                    @if (!string.IsNullOrEmpty(profile.User?.Avata))
+                                    {
+                                        <img src="@profile.User.Avata" alt="@profile.User?.FullName" 
+                                             class="rounded-circle" width="60" height="60" style="object-fit: cover;">
+                                    }
+                                    else
+                                    {
+                                        <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center text-white" 
+                                             style="width: 60px; height: 60px; font-size: 1.5rem;">
+                                            @(profile.User?.FullName?.FirstOrDefault().ToString().ToUpper() ?? "U")
+                                        </div>
+                                    }
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h5 class="card-title mb-1">@profile.User?.FullName</h5>
+                                    <p class="text-muted mb-0">
+                                        <i class="bi bi-geo-alt me-1"></i>@profile.Location
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Profile Summary -->
+                            <p class="card-text text-muted mb-3" style="height: 60px; overflow: hidden;">
+                                @(profile.Summary?.Length > 100 ? profile.Summary.Substring(0, 100) + "..." : profile.Summary)
+                            </p>
+
+                            <!-- Skills -->
+                            @if (profile.UserProfileSkills?.Any() == true)
+                            {
+                                <div class="mb-3">
+                                    <h6 class="text-muted mb-2">Kỹ năng:</h6>
+                                    <div class="d-flex flex-wrap gap-1">
+                                        @foreach (var skill in profile.UserProfileSkills.Take(3))
+                                        {
+                                            <span class="badge bg-light text-dark">@skill.Skill?.SkillName</span>
+                                        }
+                                        @if (profile.UserProfileSkills.Count > 3)
+                                        {
+                                            <span class="badge bg-secondary">+@(profile.UserProfileSkills.Count - 3)</span>
+                                        }
+                                    </div>
+                                </div>
+                            }
+
+                            <!-- Professions -->
+                            @if (profile.UserProfileProfessions?.Any() == true)
+                            {
+                                <div class="mb-3">
+                                    <h6 class="text-muted mb-2">Ngành nghề:</h6>
+                                    <div class="d-flex flex-wrap gap-1">
+                                        @foreach (var profession in profile.UserProfileProfessions.Take(2))
+                                        {
+                                            <span class="badge bg-primary">@profession.Profession?.ProfessionName</span>
+                                        }
+                                        @if (profile.UserProfileProfessions.Count > 2)
+                                        {
+                                            <span class="badge bg-secondary">+@(profile.UserProfileProfessions.Count - 2)</span>
+                                        }
+                                    </div>
+                                </div>
+                            }
+
+                            <!-- Salary -->
+                            @if (profile.ExpectedSalary.HasValue)
+                            {
+                                <div class="mb-3">
+                                    <h6 class="text-muted mb-1">Mức lương mong muốn:</h6>
+                                    <span class="text-success fw-bold">@profile.ExpectedSalary.Value.ToString("N0") VND</span>
+                                </div>
+                            }
+
+                            <!-- Action Button -->
+                            <div class="d-grid">
+                                <a href="@Url.Action("ProfileDetail", "Home", new { id = profile.ProfileId })" 
+                                   class="btn btn-outline-primary">
+                                    <i class="bi bi-eye me-2"></i>Xem hồ sơ chi tiết
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <!-- Card Footer -->
+                        <div class="card-footer bg-light border-0">
+                            <small class="text-muted">
+                                <i class="bi bi-clock me-1"></i>
+                                Cập nhật: @profile.UpdatedDate.ToString("dd/MM/yyyy")
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Pagination -->
+        @if (totalPages > 1)
+        {
+            <div class="row mt-4">
+                <div class="col-12">
+                    <nav aria-label="Phân trang kết quả tìm kiếm">
+                        <ul class="pagination justify-content-center">
+                            <!-- Previous Page -->
+                            <li class="page-item @(currentPage <= 1 ? "disabled" : "")">
+                                <a class="page-link" href="@Url.Action("Search", "Home", new { 
+                                    keyword = searchParams?.Keyword, 
+                                    location = searchParams?.Location, 
+                                    categoryId = searchParams?.CategoryId, 
+                                    minSalary = searchParams?.MinSalary, 
+                                    maxSalary = searchParams?.MaxSalary, 
+                                    page = currentPage - 1 
+                                })">
+                                    <i class="bi bi-chevron-left"></i>
+                                </a>
+                            </li>
+
+                            <!-- Page Numbers -->
+                            @{
+                                var startPage = Math.Max(1, currentPage - 2);
+                                var endPage = Math.Min(totalPages, currentPage + 2);
+                            }
+
+                            @if (startPage > 1)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" href="@Url.Action("Search", "Home", new { 
+                                        keyword = searchParams?.Keyword, 
+                                        location = searchParams?.Location, 
+                                        categoryId = searchParams?.CategoryId, 
+                                        minSalary = searchParams?.MinSalary, 
+                                        maxSalary = searchParams?.MaxSalary, 
+                                        page = 1 
+                                    })">1</a>
+                                </li>
+                                @if (startPage > 2)
+                                {
+                                    <li class="page-item disabled">
+                                        <span class="page-link">...</span>
+                                    </li>
+                                }
+                            }
+
+                            @for (int i = startPage; i <= endPage; i++)
+                            {
+                                <li class="page-item @(i == currentPage ? "active" : "")">
+                                    <a class="page-link" href="@Url.Action("Search", "Home", new { 
+                                        keyword = searchParams?.Keyword, 
+                                        location = searchParams?.Location, 
+                                        categoryId = searchParams?.CategoryId, 
+                                        minSalary = searchParams?.MinSalary, 
+                                        maxSalary = searchParams?.MaxSalary, 
+                                        page = i 
+                                    })">@i</a>
+                                </li>
+                            }
+
+                            @if (endPage < totalPages)
+                            {
+                                @if (endPage < totalPages - 1)
+                                {
+                                    <li class="page-item disabled">
+                                        <span class="page-link">...</span>
+                                    </li>
+                                }
+                                <li class="page-item">
+                                    <a class="page-link" href="@Url.Action("Search", "Home", new { 
+                                        keyword = searchParams?.Keyword, 
+                                        location = searchParams?.Location, 
+                                        categoryId = searchParams?.CategoryId, 
+                                        minSalary = searchParams?.MinSalary, 
+                                        maxSalary = searchParams?.MaxSalary, 
+                                        page = totalPages 
+                                    })">@totalPages</a>
+                                </li>
+                            }
+
+                            <!-- Next Page -->
+                            <li class="page-item @(currentPage >= totalPages ? "disabled" : "")">
+                                <a class="page-link" href="@Url.Action("Search", "Home", new { 
+                                    keyword = searchParams?.Keyword, 
+                                    location = searchParams?.Location, 
+                                    categoryId = searchParams?.CategoryId, 
+                                    minSalary = searchParams?.MinSalary, 
+                                    maxSalary = searchParams?.MaxSalary, 
+                                    page = currentPage + 1 
+                                })">
+                                    <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <!-- No Results -->
+        <div class="row">
+            <div class="col-12">
+                <div class="text-center py-5">
+                    <div class="mb-4">
+                        <i class="bi bi-search display-1 text-muted"></i>
+                    </div>
+                    <h3 class="text-muted mb-3">Không tìm thấy hồ sơ phù hợp</h3>
+                    <p class="text-muted mb-4">
+                        Hãy thử điều chỉnh bộ lọc tìm kiếm hoặc sử dụng từ khóa khác
+                    </p>
+                    <div class="d-flex gap-3 justify-content-center">
+                        <a href="@Url.Action("Search", "Home")" class="btn btn-primary">
+                            <i class="bi bi-arrow-clockwise me-2"></i>Tìm kiếm mới
+                        </a>
+                        <a href="@Url.Action("Index", "Home")" class="btn btn-outline-secondary">
+                            <i class="bi bi-house me-2"></i>Về trang chủ
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+<script>
+$(document).ready(function() {
+    // Load categories for search dropdown
+    loadCategoriesForSearch();
+});
+
+function loadCategoriesForSearch() {
+    $.get('/Home/GetAllCategories', function(data) {
+        if (data && data.length > 0) {
+            let options = '<option value="">Tất cả ngành nghề</option>';
+            const selectedCategoryId = @Html.Raw(Json.Serialize(searchParams?.CategoryId ?? 0));
+            data.forEach(function(category) {
+                const selected = category.categoryId == selectedCategoryId ? 'selected' : '';
+                options += `<option value="${category.categoryId}" ${selected}>${category.categoryName}</option>`;
+            });
+            $('#categorySelect').html(options);
+        }
+    });
+}
+
+// Auto-submit form when filters change (optional)
+$('#categorySelect').on('change', function() {
+    // Uncomment to auto-submit when category changes
+    // $('#searchForm').submit();
+});
+</script>
+}
+
+<style>
+.profile-card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.profile-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+}
+
+.badge {
+    font-size: 0.75rem;
+}
+
+.card-footer {
+    padding: 0.75rem 1.25rem;
+}
+
+.pagination .page-link {
+    border-radius: 0.375rem;
+    margin: 0 0.125rem;
+    border: 1px solid #dee2e6;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+</style>

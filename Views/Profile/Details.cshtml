@@ -1,0 +1,340 @@
+@model finder_work.Models.UserProfile
+
+@{
+    ViewData["Title"] = "Chi tiết hồ sơ #" + Model.ProfileId;
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-user-circle"></i> Chi tiết hồ sơ #@Model.ProfileId</h2>
+                <div>
+                    <a href="@Url.Action("Index")" class="btn btn-secondary me-2">
+                        <i class="fas fa-arrow-left"></i> Quay lại
+                    </a>
+                    <a href="@Url.Action("CVView", new { id = Model.ProfileId })" class="btn btn-success me-2" target="_blank">
+                        <i class="fas fa-eye"></i> Xem CV
+                    </a>
+                    <a href="@Url.Action("Edit", new { id = Model.ProfileId })" class="btn btn-warning me-2">
+                        <i class="fas fa-edit"></i> Chỉnh sửa
+                    </a>
+                    <button type="button" class="btn btn-danger" onclick="confirmDelete(@Model.ProfileId, '@Model.User?.FullName')">
+                        <i class="fas fa-trash"></i> Xóa hồ sơ
+                    </button>
+                </div>
+            </div>
+
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    @TempData["Success"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    @TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            <!-- Thông tin cơ bản -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-info-circle"></i> Thông tin cơ bản</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 text-center">
+                            @if (!string.IsNullOrEmpty(Model.User?.Avata))
+                            {
+                                <img src="@Model.User.Avata" alt="Avatar" class="rounded-circle mb-3" style="width: 120px; height: 120px; object-fit: cover;">
+                            }
+                            else
+                            {
+                                <div class="rounded-circle bg-secondary d-inline-flex align-items-center justify-content-center mb-3" style="width: 120px; height: 120px;">
+                                    <i class="fas fa-user fa-3x text-white"></i>
+                                </div>
+                            }
+                            <div>
+                                <span class="badge @(Model.ApprovalStatus == "Approved" ? "bg-success" : Model.ApprovalStatus == "Rejected" ? "bg-danger" : "bg-warning") fs-6">
+                                    @(Model.ApprovalStatus == "Approved" ? "Đã duyệt" : Model.ApprovalStatus == "Rejected" ? "Bị từ chối" : "Chờ duyệt")
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>Họ và tên:</strong></td>
+                                    <td>@(Model.User?.FullName ?? "Chưa cập nhật")</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Email:</strong></td>
+                                    <td>@(Model.User?.Email ?? "Chưa cập nhật")</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Số điện thoại:</strong></td>
+                                    <td>@(Model.User?.PhoneNumber ?? "Chưa cập nhật")</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Địa điểm:</strong></td>
+                                    <td>@(Model.Location ?? "Chưa cập nhật")</td>
+                                </tr>
+                                @if (Model.ExpectedSalary.HasValue)
+                                {
+                                    <tr>
+                                        <td><strong>Mức lương mong muốn:</strong></td>
+                                        <td>@Model.ExpectedSalary.Value.ToString("N0") VND</td>
+                                    </tr>
+                                }
+                                <tr>
+                                    <td><strong>Ngày tạo:</strong></td>
+                                    <td>@Model.CreatedDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Cập nhật lần cuối:</strong></td>
+                                    <td>@Model.UpdatedDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.Summary))
+                    {
+                        <hr>
+                        <h6><i class="fas fa-quote-left"></i> Tóm tắt về bản thân</h6>
+                        <p class="text-muted">@Model.Summary</p>
+                    }
+
+                    @if (Model.ApprovalStatus == "Rejected" && !string.IsNullOrEmpty(Model.RejectionReason))
+                    {
+                        <hr>
+                        <div class="alert alert-danger">
+                            <h6><i class="fas fa-exclamation-triangle"></i> Lý do từ chối</h6>
+                            <p class="mb-0">@Model.RejectionReason</p>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Chuyên môn và Kỹ năng -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0"><i class="fas fa-briefcase"></i> Chuyên môn</h6>
+                        </div>
+                        <div class="card-body">
+                            @if (Model.UserProfileProfessions?.Any() == true)
+                            {
+                                @foreach (var profession in Model.UserProfileProfessions)
+                                {
+                                    <span class="badge bg-primary me-2 mb-2">@profession.Profession?.ProfessionName</span>
+                                }
+                            }
+                            else
+                            {
+                                <p class="text-muted mb-0">Chưa có thông tin chuyên môn</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-success text-white">
+                            <h6 class="mb-0"><i class="fas fa-cogs"></i> Kỹ năng</h6>
+                        </div>
+                        <div class="card-body">
+                            @if (Model.UserProfileSkills?.Any() == true)
+                            {
+                                @foreach (var skill in Model.UserProfileSkills)
+                                {
+                                    <span class="badge bg-success me-2 mb-2">@skill.Skill?.SkillName</span>
+                                }
+                            }
+                            else
+                            {
+                                <p class="text-muted mb-0">Chưa có thông tin kỹ năng</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kinh nghiệm làm việc -->
+            <div class="card mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <h6 class="mb-0"><i class="fas fa-briefcase"></i> Kinh nghiệm làm việc</h6>
+                </div>
+                <div class="card-body">
+                    @if (Model.WorkExperiences?.Any() == true)
+                    {
+                        @foreach (var exp in Model.WorkExperiences.OrderByDescending(e => e.StartDate))
+                        {
+                            <div class="border-start border-primary border-3 ps-3 mb-3">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="mb-1">@exp.WorkName</h6>
+                                        <p class="text-primary mb-1">@exp.CompanyName</p>
+                                        @if (!string.IsNullOrEmpty(exp.WorkDescription))
+                                        {
+                                            <p class="text-muted small mb-0">@exp.WorkDescription</p>
+                                        }
+                                    </div>
+                                    <div class="text-end">
+                                        <small class="text-muted">
+                                            @if (exp.StartDate.HasValue)
+                                            {
+                                                @exp.StartDate.Value.ToString("MM/yyyy")
+                                            }
+                                            -
+                                            @if (exp.EndDate.HasValue)
+                                            {
+                                                @exp.EndDate.Value.ToString("MM/yyyy")
+                                            }
+                                            else
+                                            {
+                                                <span>Hiện tại</span>
+                                            }
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-muted mb-0">Chưa có thông tin kinh nghiệm làm việc</p>
+                    }
+                </div>
+            </div>
+
+            <!-- Học vấn -->
+            <div class="card mb-4">
+                <div class="card-header bg-secondary text-white">
+                    <h6 class="mb-0"><i class="fas fa-graduation-cap"></i> Học vấn</h6>
+                </div>
+                <div class="card-body">
+                    @if (Model.Degrees?.Any() == true)
+                    {
+                        @foreach (var degree in Model.Degrees.OrderByDescending(d => d.GraduationYear))
+                        {
+                            <div class="border-start border-secondary border-3 ps-3 mb-3">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="mb-1">@degree.DegreeName</h6>
+                                        <p class="text-secondary mb-1">@degree.SchoolName</p>
+                                        @if (!string.IsNullOrEmpty(degree.Major))
+                                        {
+                                            <p class="text-muted small mb-0">Chuyên ngành: @degree.Major</p>
+                                        }
+                                    </div>
+                                    <div class="text-end">
+                                        @if (degree.GraduationYear.HasValue)
+                                        {
+                                            <small class="text-muted">@degree.GraduationYear.Value</small>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-muted mb-0">Chưa có thông tin học vấn</p>
+                    }
+                </div>
+            </div>
+
+            <!-- Chứng chỉ -->
+            <div class="card mb-4">
+                <div class="card-header bg-dark text-white">
+                    <h6 class="mb-0"><i class="fas fa-certificate"></i> Chứng chỉ</h6>
+                </div>
+                <div class="card-body">
+                    @if (Model.Certificates?.Any() == true)
+                    {
+                        @foreach (var cert in Model.Certificates.OrderByDescending(c => c.IssueDate))
+                        {
+                            <div class="border-start border-dark border-3 ps-3 mb-3">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="mb-1">
+                                            <i class="fas fa-award text-warning me-2"></i>@cert.CertificateName
+                                        </h6>
+                                        <p class="text-dark mb-0">@cert.IssueBy</p>
+                                    </div>
+                                    <div class="text-end">
+                                        @if (cert.IssueDate.HasValue)
+                                        {
+                                            <small class="text-muted">@cert.IssueDate.Value.ToString("MM/yyyy")</small>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-muted mb-0">Chưa có thông tin chứng chỉ</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="fas fa-exclamation-triangle"></i> Xác nhận xóa hồ sơ
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center">
+                    <i class="fas fa-trash-alt fa-3x text-danger mb-3"></i>
+                    <h5>Bạn có chắc chắn muốn xóa hồ sơ này?</h5>
+                    <p class="text-muted mb-3">
+                        Hồ sơ <strong id="profileInfo"></strong> sẽ bị xóa vĩnh viễn và không thể khôi phục.
+                    </p>
+                    <div class="alert alert-warning">
+                        <small>
+                            <i class="fas fa-info-circle"></i>
+                            Tất cả thông tin liên quan (kỹ năng, kinh nghiệm, học vấn, chứng chỉ) cũng sẽ bị xóa.
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> Hủy bỏ
+                </button>
+                <form id="deleteForm" method="post" style="display: inline;">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="deleteProfileId" name="id" value="" />
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Xóa hồ sơ
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function confirmDelete(profileId, fullName) {
+    document.getElementById('profileInfo').textContent = `#${profileId} - ${fullName || 'Không có tên'}`;
+    document.getElementById('deleteForm').action = `@Url.Action("Delete", "Profile")`;
+    document.getElementById('deleteProfileId').value = profileId;
+    
+    var deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    deleteModal.show();
+}
+</script>

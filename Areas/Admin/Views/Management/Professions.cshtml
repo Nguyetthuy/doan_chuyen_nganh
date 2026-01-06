@@ -1,0 +1,220 @@
+@model IEnumerable<finder_work.Models.Profession>
+@section Sidebar { @await Html.PartialAsync("_AdminSidebar") }
+
+<div class="container-fluid">
+    <h2>Quản lý các ngành nghề cần tìm việc</h2>
+    
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Add New Profession Form -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Thêm nghề nghiệp mới</h5>
+        </div>
+        <div class="card-body">
+            <form action="/Admin/Management/CreateProfession" method="post">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label for="professionName" class="form-label">Tên nghề nghiệp</label>
+                            <input type="text" class="form-control" id="professionName" name="professionName" required>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label for="professionDescription" class="form-label">Mô tả</label>
+                            <input type="text" class="form-control" id="professionDescription" name="professionDescription">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label for="categoryId" class="form-label">Nhóm ngành</label>
+                            <select class="form-control" id="categoryId" name="categoryId" required>
+                                <option value="">Chọn nhóm ngành</option>
+                                @if (ViewBag.Categories != null)
+                                {
+                                    @foreach (var category in ViewBag.Categories)
+                                    {
+                                        <option value="@category.CategoryId">@category.CategoryName</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="mb-3">
+                            <label class="form-label">&nbsp;</label>
+                            <button type="submit" class="btn btn-primary d-block">Thêm nghề nghiệp</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Professions List -->
+    <div class="card">
+        <div class="card-header">
+            <h5>Danh sách nghề nghiệp</h5>
+        </div>
+        <div class="card-body">
+            @if (Model != null && Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Tên nghề nghiệp</th>
+                                <th>Mô tả</th>
+                                <th>Nhóm ngành</th>
+                                <th>Số người quan tâm</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var profession in Model)
+                            {
+                                <tr>
+                                    <td>@profession.ProfessionId</td>
+                                    <td>@profession.ProfessionName</td>
+                                    <td>@profession.ProfessionDescription</td>
+                                    <td>@profession.Category?.CategoryName</td>
+                                    <td>@profession.UserProfileProfessions.Count</td>
+                                    <td>
+                                        <button type="button" class="btn btn-sm btn-warning me-1" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#editModal@(profession.ProfessionId)">
+                                            <i class="fas fa-edit"></i> Sửa
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-danger" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#deleteModal@(profession.ProfessionId)">
+                                            <i class="fas fa-trash"></i> Xóa
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-4">
+                    <p class="text-muted">Chưa có nghề nghiệp nào được tạo.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Edit and Delete Modals -->
+@if (Model != null && Model.Any())
+{
+    @foreach (var profession in Model)
+    {
+        <!-- Edit Modal -->
+        <div class="modal fade" id="editModal@(profession.ProfessionId)" tabindex="-1" aria-labelledby="editModalLabel@(profession.ProfessionId)" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editModalLabel@(profession.ProfessionId)">Sửa nghề nghiệp</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form action="/Admin/Management/UpdateProfession" method="post">
+                        <div class="modal-body">
+                            <input type="hidden" name="professionId" value="@profession.ProfessionId" />
+                            <div class="mb-3">
+                                <label for="professionName@(profession.ProfessionId)" class="form-label">Tên nghề nghiệp</label>
+                                <input type="text" class="form-control" id="professionName@(profession.ProfessionId)" 
+                                       name="professionName" value="@profession.ProfessionName" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="professionDescription@(profession.ProfessionId)" class="form-label">Mô tả</label>
+                                <input type="text" class="form-control" id="professionDescription@(profession.ProfessionId)" 
+                                       name="professionDescription" value="@profession.ProfessionDescription">
+                            </div>
+                            <div class="mb-3">
+                                <label for="categoryId@(profession.ProfessionId)" class="form-label">Nhóm ngành</label>
+                                <select class="form-control" id="categoryId@(profession.ProfessionId)" name="categoryId" required>
+                                    @if (ViewBag.Categories != null)
+                                    {
+                                        @foreach (var category in ViewBag.Categories)
+                                        {
+                                            <option value="@category.CategoryId" 
+                                                    @(category.CategoryId == profession.CategoryId ? "selected" : "")>
+                                                @category.CategoryName
+                                            </option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                            <button type="submit" class="btn btn-primary">Cập nhật</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Modal -->
+        <div class="modal fade" id="deleteModal@(profession.ProfessionId)" tabindex="-1" aria-labelledby="deleteModalLabel@(profession.ProfessionId)" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="deleteModalLabel@(profession.ProfessionId)">Xác nhận xóa</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Bạn có chắc chắn muốn xóa nghề nghiệp "<strong>@profession.ProfessionName</strong>" không?</p>
+                        @if (profession.UserProfileProfessions.Count > 0)
+                        {
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                Nghề nghiệp này có <strong>@profession.UserProfileProfessions.Count</strong> người quan tâm. 
+                                Bạn cần cân nhắc trước khi xóa.
+                            </div>
+                        }
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        @if (profession.UserProfileProfessions.Count == 0)
+                        {
+                            <form action="/Admin/Management/DeleteProfession" method="post" style="display: inline;">
+                                <input type="hidden" name="professionId" value="@profession.ProfessionId" />
+                                <button type="submit" class="btn btn-danger">Xóa</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <form action="/Admin/Management/DeleteProfession" method="post" style="display: inline;">
+                                <input type="hidden" name="professionId" value="@profession.ProfessionId" />
+                                <button type="submit" class="btn btn-danger" 
+                                        onclick="return confirm('Nghề nghiệp này có người quan tâm. Bạn có chắc muốn xóa?')">
+                                    Xóa (có rủi ro)
+                                </button>
+                            </form>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+}

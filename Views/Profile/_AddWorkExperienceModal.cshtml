@@ -1,0 +1,80 @@
+@model finder_work.Models.UserProfile
+
+<!-- Add Work Experience Modal -->
+<div class="modal fade" id="addWorkExperienceModal" tabindex="-1" aria-labelledby="addWorkExperienceModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addWorkExperienceModalLabel">
+                    <i class="fas fa-briefcase"></i> Thêm kinh nghiệm làm việc
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="AddWorkExperience" method="post">
+                <div class="modal-body">
+                    <input type="hidden" name="profileId" value="@(Model?.ProfileId ?? 0)" />
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="workName" class="form-label">Vị trí công việc *</label>
+                                <input type="text" class="form-control" name="workName" required 
+                                       placeholder="Ví dụ: Lập trình viên Frontend">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="companyName" class="form-label">Tên công ty *</label>
+                                <input type="text" class="form-control" name="companyName" required 
+                                       placeholder="Ví dụ: Công ty ABC">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="startDate" class="form-label">Ngày bắt đầu *</label>
+                                <input type="date" class="form-control" name="startDate" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="endDate" class="form-label">Ngày kết thúc</label>
+                                <input type="date" class="form-control" name="endDate">
+                                <small class="text-muted">Để trống nếu vẫn đang làm việc</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="workTypeId" class="form-label">Loại công việc</label>
+                                <select class="form-select" name="workTypeId">
+                                    <option value="">Chọn loại công việc</option>
+                                    @if (ViewBag.WorkTypes != null)
+                                    {
+                                        @foreach (var workType in (List<finder_work.Models.WorkType>)ViewBag.WorkTypes)
+                                        {
+                                            <option value="@workType.WorkTypeId">@workType.WorkTypeName</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="workDescription" class="form-label">Mô tả công việc</label>
+                        <textarea class="form-control" name="workDescription" rows="3" 
+                                  placeholder="Mô tả chi tiết về công việc, trách nhiệm và thành tích..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Thêm kinh nghiệm
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

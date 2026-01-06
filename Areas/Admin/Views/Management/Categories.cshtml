@@ -1,0 +1,175 @@
+@model IEnumerable<finder_work.Models.Category>
+@section Sidebar { @await Html.PartialAsync("_AdminSidebar") }
+
+<div class="container-fluid">
+    <h2>Quản lý các nhóm ngành</h2>
+    
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Add New Category Form -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Thêm nhóm ngành mới</h5>
+        </div>
+        <div class="card-body">
+            <form action="/Admin/Management/CreateCategory" method="post" id="createCategoryForm">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label for="categoryName" class="form-label">Tên nhóm ngành</label>
+                            <input type="text" class="form-control" id="categoryName" name="categoryName" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="categoryDescription" class="form-label">Mô tả</label>
+                            <input type="text" class="form-control" id="categoryDescription" name="categoryDescription">
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="mb-3">
+                            <label class="form-label">&nbsp;</label>
+                            <button type="submit" class="btn btn-primary d-block">Thêm nhóm ngành</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Categories List -->
+    <div class="card">
+        <div class="card-header">
+            <h5>Danh sách nhóm ngành</h5>
+        </div>
+        <div class="card-body">
+            @if (Model != null && Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Tên nhóm ngành</th>
+                                <th>Mô tả</th>
+                                <th>Số lượng nghề nghiệp</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var category in Model)
+                            {
+                                <tr>
+                                    <td>@category.CategoryId</td>
+                                    <td>@category.CategoryName</td>
+                                    <td>@category.CategoryDescription</td>
+                                    <td>@category.Professions.Count</td>
+                                    <td>
+                                        <button type="button" class="btn btn-sm btn-warning me-1" data-bs-toggle="modal" data-bs-target="#editModal@(category.CategoryId)">
+                                            <i class="fas fa-edit"></i> Sửa
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal@(category.CategoryId)">
+                                            <i class="fas fa-trash"></i> Xóa
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-4">
+                    <p class="text-muted">Chưa có nhóm ngành nào được tạo.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Edit and Delete Modals -->
+@if (Model != null && Model.Any())
+{
+    @foreach (var category in Model)
+    {
+        <!-- Edit Modal -->
+        <div class="modal fade" id="editModal@(category.CategoryId)" tabindex="-1" aria-labelledby="editModalLabel@(category.CategoryId)" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editModalLabel@(category.CategoryId)">Sửa nhóm ngành</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form action="/Admin/Management/UpdateCategory" method="post">
+                        <div class="modal-body">
+                            <input type="hidden" name="categoryId" value="@category.CategoryId" />
+                            <div class="mb-3">
+                                <label for="categoryName@(category.CategoryId)" class="form-label">Tên nhóm ngành</label>
+                                <input type="text" class="form-control" id="categoryName@(category.CategoryId)" name="categoryName" value="@category.CategoryName" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="categoryDescription@(category.CategoryId)" class="form-label">Mô tả</label>
+                                <input type="text" class="form-control" id="categoryDescription@(category.CategoryId)" name="categoryDescription" value="@category.CategoryDescription">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                            <button type="submit" class="btn btn-primary">Cập nhật</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Modal -->
+        <div class="modal fade" id="deleteModal@(category.CategoryId)" tabindex="-1" aria-labelledby="deleteModalLabel@(category.CategoryId)" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="deleteModalLabel@(category.CategoryId)">Xác nhận xóa</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Bạn có chắc chắn muốn xóa nhóm ngành "<strong>@category.CategoryName</strong>" không?</p>
+                        @if (category.Professions.Count > 0)
+                        {
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                Nhóm ngành này có <strong>@category.Professions.Count</strong> nghề nghiệp liên quan. Bạn cần xóa các nghề nghiệp trước khi xóa nhóm ngành này.
+                            </div>
+                        }
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        @if (category.Professions.Count == 0)
+                        {
+                            <form action="/Admin/Management/DeleteCategory" method="post" style="display: inline;">
+                                <input type="hidden" name="categoryId" value="@category.CategoryId" />
+                                <button type="submit" class="btn btn-danger">Xóa</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <button type="button" class="btn btn-danger" disabled>Không thể xóa</button>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+}

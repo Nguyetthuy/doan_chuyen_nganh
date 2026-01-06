@@ -1,0 +1,176 @@
+@{
+    ViewData["Title"] = "Đăng ký";
+}
+
+<div class="auth-container">
+    <div class="container">
+        <div class="row justify-content-center align-items-center min-vh-100">
+            <div class="col-lg-8 col-md-10">
+                <div class="auth-card">
+                    <div class="text-center mb-4">
+                        <div class="auth-logo mb-3">
+                            <i class="bi bi-person-plus text-primary" style="font-size: 3rem;"></i>
+                        </div>
+                        <h2 class="fw-bold mb-2">Đăng ký tài khoản</h2>
+                        <p class="text-muted">Tạo tài khoản để xây dựng hồ sơ chuyên nghiệp</p>
+                    </div>
+
+                    <form asp-action="Register" asp-controller="Account" method="post" class="auth-form">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="fullName" class="form-label fw-medium">
+                                    <i class="bi bi-person me-2 text-primary"></i>Họ và tên
+                                </label>
+                                <input type="text" class="form-control form-control-lg" id="fullName" name="fullName" 
+                                       placeholder="Nhập họ và tên đầy đủ" required />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="phone" class="form-label fw-medium">
+                                    <i class="bi bi-telephone me-2 text-primary"></i>Số điện thoại
+                                </label>
+                                <input type="tel" class="form-control form-control-lg" id="phone" name="phone" 
+                                       placeholder="Nhập số điện thoại" />
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="email" class="form-label fw-medium">
+                                <i class="bi bi-envelope me-2 text-primary"></i>Email
+                            </label>
+                            <input type="email" class="form-control form-control-lg" id="email" name="email" 
+                                   placeholder="Nhập địa chỉ email" required />
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="password" class="form-label fw-medium">
+                                    <i class="bi bi-lock me-2 text-primary"></i>Mật khẩu
+                                </label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control form-control-lg" id="password" name="password" 
+                                           placeholder="Tạo mật khẩu" required />
+                                    <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="confirmPassword" class="form-label fw-medium">
+                                    <i class="bi bi-lock-fill me-2 text-primary"></i>Xác nhận mật khẩu
+                                </label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control form-control-lg" id="confirmPassword" name="confirmPassword" 
+                                           placeholder="Nhập lại mật khẩu" required />
+                                    <button class="btn btn-outline-secondary" type="button" id="toggleConfirmPassword">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="agreeTerms" required>
+                                <label class="form-check-label text-muted" for="agreeTerms">
+                                    Tôi đồng ý với <a href="#" class="text-primary text-decoration-none">Điều khoản sử dụng</a> 
+                                    và <a href="#" class="text-primary text-decoration-none">Chính sách bảo mật</a>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="d-grid mb-3">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-person-plus me-2"></i>Đăng ký
+                            </button>
+                        </div>
+
+                        <div class="text-center">
+                            <p class="text-muted mb-0">
+                                Đã có tài khoản? 
+                                <a class="text-primary text-decoration-none fw-medium" asp-action="Login" asp-controller="Account">
+                                    Đăng nhập ngay
+                                </a>
+                            </p>
+                        </div>
+                    </form>
+
+                    <div class="divider my-4">
+                        <span class="divider-text">Hoặc đăng ký với</span>
+                    </div>
+
+                    <div class="social-login">
+                        <button type="button" class="btn btn-outline-secondary btn-lg w-100 mb-2">
+                            <i class="bi bi-google me-2"></i>Đăng ký với Google
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-lg w-100">
+                            <i class="bi bi-facebook me-2"></i>Đăng ký với Facebook
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Toggle password visibility
+        document.getElementById('togglePassword').addEventListener('click', function() {
+            const password = document.getElementById('password');
+            const icon = this.querySelector('i');
+            
+            if (password.type === 'password') {
+                password.type = 'text';
+                icon.classList.remove('bi-eye');
+                icon.classList.add('bi-eye-slash');
+            } else {
+                password.type = 'password';
+                icon.classList.remove('bi-eye-slash');
+                icon.classList.add('bi-eye');
+            }
+        });
+
+        document.getElementById('toggleConfirmPassword').addEventListener('click', function() {
+            const confirmPassword = document.getElementById('confirmPassword');
+            const icon = this.querySelector('i');
+            
+            if (confirmPassword.type === 'password') {
+                confirmPassword.type = 'text';
+                icon.classList.remove('bi-eye');
+                icon.classList.add('bi-eye-slash');
+            } else {
+                confirmPassword.type = 'password';
+                icon.classList.remove('bi-eye-slash');
+                icon.classList.add('bi-eye');
+            }
+        });
+
+        // Password strength validation
+        document.getElementById('password').addEventListener('input', function() {
+            const password = this.value;
+            const confirmPassword = document.getElementById('confirmPassword');
+            
+            if (password.length < 8) {
+                this.setCustomValidity('Mật khẩu phải có ít nhất 8 ký tự');
+            } else {
+                this.setCustomValidity('');
+            }
+            
+            if (confirmPassword.value && password !== confirmPassword.value) {
+                confirmPassword.setCustomValidity('Mật khẩu không khớp');
+            } else {
+                confirmPassword.setCustomValidity('');
+            }
+        });
+
+        document.getElementById('confirmPassword').addEventListener('input', function() {
+            const password = document.getElementById('password').value;
+            
+            if (this.value !== password) {
+                this.setCustomValidity('Mật khẩu không khớp');
+            } else {
+                this.setCustomValidity('');
+            }
+        });
+    </script>
+}

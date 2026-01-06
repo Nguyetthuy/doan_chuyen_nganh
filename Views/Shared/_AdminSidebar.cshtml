@@ -1,0 +1,16 @@
+@{
+    var area = ViewContext.RouteData.Values["area"]?.ToString();
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+    var action = ViewContext.RouteData.Values["action"]?.ToString();
+    Func<string,string,bool> isActive = (c,a) => string.Equals(area, "Admin", StringComparison.OrdinalIgnoreCase) && string.Equals(controller, c, StringComparison.OrdinalIgnoreCase) && string.Equals(action, a, StringComparison.OrdinalIgnoreCase);
+}
+<div class="list-group admin-sidebar">
+    <a class="list-group-item list-group-item-action @(isActive("Management","JobProfiles") ? "active" : "")" asp-area="Admin" asp-controller="Management" asp-action="JobProfiles">Quản lý hồ sơ người tìm việc</a>
+    <a class="list-group-item list-group-item-action @(isActive("Management","Categories") ? "active" : "")" asp-area="Admin" asp-controller="Management" asp-action="Categories">Quản lý nhóm ngành</a>
+    <a class="list-group-item list-group-item-action @(isActive("Management","SkillTypes") ? "active" : "")" asp-area="Admin" asp-controller="Management" asp-action="SkillTypes">Quản lý loại kỹ năng</a>
+    <a class="list-group-item list-group-item-action @(isActive("Management","CertificateTypes") ? "active" : "")" asp-area="Admin" asp-controller="Management" asp-action="CertificateTypes">Quản lý loại chứng chỉ</a>
+    <a class="list-group-item list-group-item-action @(isActive("Management","DegreeTypes") ? "active" : "")" asp-area="Admin" asp-controller="Management" asp-action="DegreeTypes">Quản lý loại bằng cấp</a>
+    <a class="list-group-item list-group-item-action @(isActive("Management","WorkTypes") ? "active" : "")" asp-area="Admin" asp-controller="Management" asp-action="WorkTypes">Quản lý loại công việc</a>
+    <a class="list-group-item list-group-item-action @(isActive("Management","JobSeekerStats") ? "active" : "")" asp-area="Admin" asp-controller="Management" asp-action="JobSeekerStats">Thống kê người tìm việc</a>
+    <a class="list-group-item list-group-item-action @(isActive("Management","UserAccounts") ? "active" : "")" asp-area="Admin" asp-controller="Management" asp-action="UserAccounts">Quản lý tài khoản người dùng</a>
+</div>

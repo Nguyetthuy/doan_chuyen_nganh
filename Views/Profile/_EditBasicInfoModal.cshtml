@@ -1,0 +1,118 @@
+@model finder_work.Models.UserProfile
+
+<!-- Edit Basic Info Modal -->
+<div class="modal fade" id="editBasicInfoModal" tabindex="-1" aria-labelledby="editBasicInfoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editBasicInfoModalLabel">
+                    <i class="fas fa-edit"></i> Chỉnh sửa thông tin cơ bản
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="UpdateBasicInfo" method="post" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <input type="hidden" name="profileId" value="@(Model?.ProfileId ?? 0)" />
+                    
+                    <!-- Avatar Upload -->
+                    <div class="row mb-4">
+                        <div class="col-md-12 text-center">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Ảnh đại diện</label>
+                                <div class="d-flex justify-content-center mb-3">
+                                    @if (!string.IsNullOrEmpty(Model.User.Avata))
+                                    {
+                                        <img src="@Model.User.Avata" alt="Current Avatar" class="img-fluid rounded-circle" style="width: 100px; height: 100px; object-fit: cover;" id="currentAvatar">
+                                    }
+                                    else
+                                    {
+                                        <div class="bg-light rounded-circle d-flex align-items-center justify-content-center" style="width: 100px; height: 100px;" id="currentAvatar">
+                                            <i class="fas fa-user fa-2x text-muted"></i>
+                                        </div>
+                                    }
+                                </div>
+                                <input type="file" class="form-control" name="avatar" accept="image/*" onchange="previewAvatar(this)">
+                                <div class="form-text">Chọn ảnh mới để thay đổi ảnh đại diện (tùy chọn)</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Basic Information -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="fullName" class="form-label">Họ và tên *</label>
+                                <input type="text" class="form-control" name="fullName" value="@Model.User.FullName" required 
+                                       placeholder="Nhập họ và tên đầy đủ">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="phoneNumber" class="form-label">Số điện thoại *</label>
+                                <input type="tel" class="form-control" name="phoneNumber" value="@Model.User.PhoneNumber" required 
+                                       placeholder="Nhập số điện thoại">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="location" class="form-label">Địa điểm làm việc *</label>
+                                <input type="text" class="form-control" name="location" value="@Model.Location" required 
+                                       placeholder="Ví dụ: Hà Nội, TP.HCM">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="expectedSalary" class="form-label">Mức lương mong muốn (VND)</label>
+                                <input type="number" class="form-control" name="expectedSalary" value="@Model.ExpectedSalary" 
+                                       placeholder="Ví dụ: 15000000" min="0" step="100000">
+                                <div class="form-text">Để trống nếu chưa xác định</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="summary" class="form-label">Tóm tắt về bản thân *</label>
+                        <textarea class="form-control" name="summary" rows="4" required 
+                                  placeholder="Mô tả ngắn gọn về bản thân, kinh nghiệm và mục tiêu nghề nghiệp...">@Model.Summary</textarea>
+                        <div class="form-text">Tối đa 500 ký tự</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Cập nhật thông tin
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function previewAvatar(input) {
+    if (input.files && input.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            var currentAvatar = document.getElementById('currentAvatar');
+            if (currentAvatar.tagName === 'IMG') {
+                currentAvatar.src = e.target.result;
+            } else {
+                // Replace the div with an img element
+                var newImg = document.createElement('img');
+                newImg.src = e.target.result;
+                newImg.alt = 'Preview Avatar';
+                newImg.className = 'img-fluid rounded-circle';
+                newImg.style.width = '100px';
+                newImg.style.height = '100px';
+                newImg.style.objectFit = 'cover';
+                newImg.id = 'currentAvatar';
+                currentAvatar.parentNode.replaceChild(newImg, currentAvatar);
+            }
+        }
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+</script>

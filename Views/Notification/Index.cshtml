@@ -1,0 +1,316 @@
+@model List<finder_work.Models.Notification>
+
+@{
+    ViewData["Title"] = "Thông báo";
+    var currentPage = ViewBag.CurrentPage ?? 1;
+    var unreadCount = ViewBag.UnreadCount ?? 0;
+    var hasNotifications = ViewBag.HasNotifications ?? false;
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="h3 mb-2">
+                        <i class="bi bi-bell me-2"></i>Thông báo
+                        @if (unreadCount > 0)
+                        {
+                            <span class="badge bg-danger ms-2">@unreadCount</span>
+                        }
+                    </h2>
+                    <p class="text-muted mb-0">Quản lý tất cả thông báo của bạn</p>
+                </div>
+                <div>
+                    @if (unreadCount > 0)
+                    {
+                        <button type="button" class="btn btn-outline-primary me-2" id="markAllReadBtn">
+                            <i class="bi bi-check-all me-2"></i>Đánh dấu tất cả đã đọc
+                        </button>
+                    }
+                    <a href="@Url.Action("Index", "Home")" class="btn btn-secondary">
+                        <i class="bi bi-house me-2"></i>Trang chủ
+                    </a>
+                </div>
+            </div>
+
+            <!-- Notifications List -->
+            @if (hasNotifications)
+            {
+                <div class="card">
+                    <div class="card-body p-0">
+                        <div class="list-group list-group-flush" id="notificationsList">
+                            @foreach (var notification in Model)
+                            {
+                                <div class="list-group-item notification-item @(!notification.IsRead ? "notification-unread" : "")" 
+                                     data-id="@notification.NotificationId">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex align-items-center mb-2">
+                                                <!-- Notification Icon -->
+                                                <div class="notification-icon me-3">
+                                                    @switch (notification.Type.ToLower())
+                                                    {
+                                                        case "success":
+                                                        case "profileapproved":
+                                                            <i class="bi bi-check-circle-fill text-success fs-4"></i>
+                                                            break;
+                                                        case "error":
+                                                        case "profilerejected":
+                                                            <i class="bi bi-x-circle-fill text-danger fs-4"></i>
+                                                            break;
+                                                        case "warning":
+                                                            <i class="bi bi-exclamation-triangle-fill text-warning fs-4"></i>
+                                                            break;
+                                                        case "profilepending":
+                                                            <i class="bi bi-clock-fill text-info fs-4"></i>
+                                                            break;
+                                                        default:
+                                                            <i class="bi bi-info-circle-fill text-primary fs-4"></i>
+                                                            break;
+                                                    }
+                                                </div>
+                                                
+                                                <!-- Notification Content -->
+                                                <div class="flex-grow-1">
+                                                    <h6 class="mb-1 fw-bold">@notification.Title</h6>
+                                                    <p class="mb-2 text-muted">@notification.Message</p>
+                                                    
+                                                    <!-- Action Button -->
+                                                    @if (!string.IsNullOrEmpty(notification.ActionUrl))
+                                                    {
+                                                        <a href="@notification.ActionUrl" class="btn btn-sm btn-outline-primary">
+                                                            @(notification.ActionText ?? "Xem chi tiết")
+                                                        </a>
+                                                    }
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Notification Meta -->
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <small class="text-muted">
+                                                    <i class="bi bi-clock me-1"></i>
+                                                    @notification.CreatedDate.ToString("dd/MM/yyyy HH:mm")
+                                                </small>
+                                                
+                                                @if (!notification.IsRead)
+                                                {
+                                                    <span class="badge bg-primary">Mới</span>
+                                                }
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Action Buttons -->
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" 
+                                                    data-bs-toggle="dropdown">
+                                                <i class="bi bi-three-dots"></i>
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                @if (!notification.IsRead)
+                                                {
+                                                    <li>
+                                                        <button class="dropdown-item mark-read-btn" data-id="@notification.NotificationId">
+                                                            <i class="bi bi-check me-2"></i>Đánh dấu đã đọc
+                                                        </button>
+                                                    </li>
+                                                }
+                                                <li>
+                                                    <button class="dropdown-item text-danger delete-btn" data-id="@notification.NotificationId">
+                                                        <i class="bi bi-trash me-2"></i>Xóa
+                                                    </button>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                @if (Model.Count >= 10)
+                {
+                    <div class="d-flex justify-content-center mt-4">
+                        <nav aria-label="Phân trang thông báo">
+                            <ul class="pagination">
+                                <li class="page-item @(currentPage <= 1 ? "disabled" : "")">
+                                    <a class="page-link" href="@Url.Action("Index", new { page = currentPage - 1 })">
+                                        <i class="bi bi-chevron-left"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item active">
+                                    <span class="page-link">@currentPage</span>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="@Url.Action("Index", new { page = currentPage + 1 })">
+                                        <i class="bi bi-chevron-right"></i>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                }
+            }
+            else
+            {
+                <!-- Empty State -->
+                <div class="text-center py-5">
+                    <div class="mb-4">
+                        <i class="bi bi-bell-slash display-1 text-muted"></i>
+                    </div>
+                    <h3 class="text-muted mb-3">Chưa có thông báo nào</h3>
+                    <p class="text-muted mb-4">
+                        Bạn sẽ nhận được thông báo khi có cập nhật về hồ sơ hoặc thông tin hệ thống.
+                    </p>
+                    <a href="@Url.Action("Index", "Home")" class="btn btn-primary">
+                        <i class="bi bi-house me-2"></i>Về trang chủ
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+$(document).ready(function() {
+    // Mark single notification as read
+    $('.mark-read-btn').on('click', function() {
+        var notificationId = $(this).data('id');
+        var $item = $(`.notification-item[data-id="${notificationId}"]`);
+        
+        $.post('/Notification/MarkAsRead', { id: notificationId }, function(response) {
+            if (response.success) {
+                $item.removeClass('notification-unread');
+                $item.find('.badge:contains("Mới")').remove();
+                $item.find('.mark-read-btn').parent().remove();
+                
+                // Update unread count in header
+                updateUnreadCount();
+                
+                // Show success message
+                showToast('Đã đánh dấu thông báo là đã đọc', 'success');
+            } else {
+                showToast('Có lỗi xảy ra khi đánh dấu thông báo', 'error');
+            }
+        });
+    });
+    
+    // Mark all notifications as read
+    $('#markAllReadBtn').on('click', function() {
+        $.post('/Notification/MarkAllAsRead', function(response) {
+            if (response.success) {
+                $('.notification-item').removeClass('notification-unread');
+                $('.badge:contains("Mới")').remove();
+                $('.mark-read-btn').parent().remove();
+                $('#markAllReadBtn').hide();
+                
+                // Update unread count in header
+                updateUnreadCount();
+                
+                // Show success message
+                showToast('Đã đánh dấu tất cả thông báo là đã đọc', 'success');
+            } else {
+                showToast('Có lỗi xảy ra khi đánh dấu thông báo', 'error');
+            }
+        });
+    });
+    
+    // Delete notification
+    $('.delete-btn').on('click', function() {
+        var notificationId = $(this).data('id');
+        var $item = $(`.notification-item[data-id="${notificationId}"]`);
+        
+        if (confirm('Bạn có chắc chắn muốn xóa thông báo này?')) {
+            $.post('/Notification/Delete', { id: notificationId }, function(response) {
+                if (response.success) {
+                    $item.fadeOut(300, function() {
+                        $(this).remove();
+                        
+                        // Check if no notifications left
+                        if ($('.notification-item').length === 0) {
+                            location.reload();
+                        }
+                    });
+                    
+                    // Update unread count in header
+                    updateUnreadCount();
+                    
+                    // Show success message
+                    showToast('Đã xóa thông báo', 'success');
+                } else {
+                    showToast('Có lỗi xảy ra khi xóa thông báo', 'error');
+                }
+            });
+        }
+    });
+});
+
+function updateUnreadCount() {
+    $.get('/Notification/GetUnreadCount', function(response) {
+        if (response.success) {
+            var $badge = $('.notification-badge');
+            if (response.count > 0) {
+                $badge.text(response.count).show();
+            } else {
+                $badge.hide();
+            }
+        }
+    });
+}
+
+function showToast(message, type) {
+    // Simple toast notification
+    var alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+    var toast = `
+        <div class="alert ${alertClass} alert-dismissible fade show position-fixed" 
+             style="top: 20px; right: 20px; z-index: 9999; min-width: 300px;" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    
+    $('body').append(toast);
+    
+    // Auto remove after 3 seconds
+    setTimeout(function() {
+        $('.alert').fadeOut();
+    }, 3000);
+}
+</script>
+}
+
+<style>
+.notification-item {
+    border-left: 4px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.notification-unread {
+    background-color: #f8f9fa;
+    border-left-color: #0d6efd;
+}
+
+.notification-item:hover {
+    background-color: #f8f9fa;
+}
+
+.notification-icon {
+    min-width: 40px;
+}
+
+.dropdown-toggle::after {
+    display: none;
+}
+
+.list-group-item {
+    padding: 1.25rem;
+}
+
+.badge {
+    font-size: 0.75rem;
+}
+</style>

@@ -1,0 +1,470 @@
+@model finder_work.Models.UserProfile
+
+@{
+    ViewData["Title"] = "CV - " + (Model?.User?.FullName ?? "Hồ sơ");
+    Layout = null; // Không sử dụng layout để có thể xuất PDF
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .cv-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            display: flex;
+            min-height: 800px;
+        }
+
+        .cv-left {
+            background: linear-gradient(135deg, #4a6fa5 0%, #2c5282 100%);
+            color: white;
+            width: 300px;
+            padding: 40px 30px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cv-right {
+            flex: 1;
+            padding: 40px;
+            background: white;
+        }
+
+        .profile-image {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin: 0 auto 30px;
+            overflow: hidden;
+            border: 4px solid rgba(255,255,255,0.3);
+        }
+
+        .profile-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-image.no-image {
+            background: rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .name {
+            text-align: center;
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .title {
+            text-align: center;
+            font-size: 16px;
+            margin-bottom: 40px;
+            opacity: 0.9;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(255,255,255,0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .section-title.right {
+            color: #4a6fa5;
+            border-bottom: 2px solid #4a6fa5;
+            margin-bottom: 25px;
+            margin-top: 30px;
+        }
+
+        .section-title.right:first-child {
+            margin-top: 0;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .contact-icon {
+            width: 20px;
+            margin-right: 15px;
+            text-align: center;
+        }
+
+        .skill-item {
+            margin-bottom: 20px;
+        }
+
+        .skill-name {
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .skill-bar {
+            height: 8px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .skill-progress {
+            height: 100%;
+            background: linear-gradient(90deg, #66bb6a, #4caf50);
+            border-radius: 4px;
+            width: 85%; /* Có thể điều chỉnh theo level skill */
+        }
+
+        .profession-tag {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            margin: 5px 5px 5px 0;
+            font-size: 12px;
+        }
+
+        .summary-text {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .experience-item, .education-item, .certificate-item {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .experience-item:last-child, .education-item:last-child, .certificate-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .item-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .item-date {
+            font-size: 12px;
+            color: #999;
+            white-space: nowrap;
+        }
+
+        .item-company, .item-school {
+            font-size: 14px;
+            color: #4a6fa5;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .item-description {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .certificate-icon {
+            color: #ffa726;
+            margin-right: 8px;
+        }
+
+        @@media print {
+            body {
+                padding: 0;
+                background: white;
+            }
+            
+            .cv-container {
+                box-shadow: none;
+                max-width: none;
+                margin: 0;
+            }
+        }
+
+        .no-data {
+            color: #999;
+            font-style: italic;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="cv-container">
+        <!-- Left Panel -->
+        <div class="cv-left">
+            <!-- Profile Image -->
+            <div class="profile-image @(string.IsNullOrEmpty(Model?.User?.Avata) ? "no-image" : "")">
+                @if (!string.IsNullOrEmpty(Model?.User?.Avata))
+                {
+                    <img src="@Model.User.Avata" alt="Profile Picture" />
+                }
+                else
+                {
+                    <span>👤</span>
+                }
+            </div>
+
+            <!-- Name and Title -->
+            <div class="name">@(Model?.User?.FullName ?? "Tên không có")</div>
+            <div class="title">
+                @if (Model?.UserProfileProfessions?.Any() == true)
+                {
+                    @Model.UserProfileProfessions.First().Profession?.ProfessionName
+                }
+                else
+                {
+                    <span>Development</span>
+                }
+            </div>
+
+            <!-- Contact Info -->
+            <div class="section-title">LIÊN HỆ</div>
+            
+            <div class="contact-item">
+                <div class="contact-icon">📧</div>
+                <div>@(Model?.User?.Email ?? "Email không có")</div>
+            </div>
+
+            <div class="contact-item">
+                <div class="contact-icon">📞</div>
+                <div>@(Model?.User?.PhoneNumber ?? "SĐT không có")</div>
+            </div>
+
+            <div class="contact-item">
+                <div class="contact-icon">📍</div>
+                <div>@(Model?.Location ?? "Địa chỉ không có")</div>
+            </div>
+
+            @if (Model?.ExpectedSalary.HasValue == true)
+            {
+                <div class="contact-item">
+                    <div class="contact-icon">💰</div>
+                    <div>@Model.ExpectedSalary.Value.ToString("N0") VND</div>
+                </div>
+            }
+
+            <!-- Skills -->
+            <div class="section-title">KỸ NĂNG</div>
+            @if (Model?.UserProfileSkills?.Any() == true)
+            {
+                @foreach (var skillGroup in Model.UserProfileSkills.GroupBy(s => s.Skill?.SkillType?.SkillTypeName).Take(5))
+                {
+                    <div class="skill-item">
+                        <div class="skill-name">@skillGroup.Key</div>
+                        <div class="skill-bar">
+                            <div class="skill-progress"></div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="no-data">Chưa có thông tin kỹ năng</div>
+            }
+
+            <!-- Professions -->
+            <div class="section-title">CHUYÊN MÔN</div>
+            @if (Model?.UserProfileProfessions?.Any() == true)
+            {
+                @foreach (var profession in Model.UserProfileProfessions)
+                {
+                    <div class="profession-tag">@profession.Profession?.ProfessionName</div>
+                }
+            }
+            else
+            {
+                <div class="no-data">Chưa có thông tin chuyên môn</div>
+            }
+        </div>
+
+        <!-- Right Panel -->
+        <div class="cv-right">
+            <!-- Summary -->
+            <div class="section-title right">TÓM TẮT</div>
+            <div class="summary-text">
+                @if (!string.IsNullOrEmpty(Model?.Summary))
+                {
+                    @Model.Summary
+                }
+                else
+                {
+                    <span class="no-data">Chưa có thông tin tóm tắt về bản thân</span>
+                }
+            </div>
+
+            <!-- Experience -->
+            <div class="section-title right">KINH NGHIỆM</div>
+            @if (Model?.WorkExperiences?.Any() == true)
+            {
+                var uniqueExperiences = Model.WorkExperiences
+                    .GroupBy(e => new { e.WorkName, e.CompanyName })
+                    .Select(g => g.OrderByDescending(e => e.StartDate).First())
+                    .OrderByDescending(e => e.StartDate);
+                
+                foreach (var exp in uniqueExperiences)
+                {
+                    <div class="experience-item">
+                        <div class="item-header">
+                            <div class="item-title">@exp.WorkName</div>
+                            <div class="item-date">
+                                @if (exp.StartDate.HasValue)
+                                {
+                                    @exp.StartDate.Value.ToString("MM/yyyy")
+                                }
+                                -
+                                @if (exp.EndDate.HasValue)
+                                {
+                                    @exp.EndDate.Value.ToString("MM/yyyy")
+                                }
+                                else
+                                {
+                                    <span>Hiện tại</span>
+                                }
+                            </div>
+                        </div>
+                        <div class="item-company">@exp.CompanyName</div>
+                        @if (!string.IsNullOrEmpty(exp.WorkDescription))
+                        {
+                            <div class="item-description">@exp.WorkDescription</div>
+                        }
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="no-data">Chưa có thông tin kinh nghiệm làm việc</div>
+            }
+
+            <!-- Education -->
+            <div class="section-title right">HỌC VẤN</div>
+            @if (Model?.Degrees?.Any() == true)
+            {
+                var uniqueDegrees = Model.Degrees
+                    .GroupBy(d => new { d.DegreeName, d.SchoolName })
+                    .Select(g => g.OrderByDescending(d => d.GraduationYear).First())
+                    .OrderByDescending(d => d.GraduationYear);
+                
+                foreach (var degree in uniqueDegrees)
+                {
+                    <div class="education-item">
+                        <div class="item-header">
+                            <div class="item-title">@degree.DegreeName</div>
+                            <div class="item-date">
+                                @if (degree.GraduationYear.HasValue)
+                                {
+                                    @degree.GraduationYear.Value
+                                }
+                            </div>
+                        </div>
+                        <div class="item-school">@degree.SchoolName</div>
+                        @if (!string.IsNullOrEmpty(degree.Major))
+                        {
+                            <div class="item-description">Chuyên ngành: @degree.Major</div>
+                        }
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="no-data">Chưa có thông tin học vấn</div>
+            }
+
+            <!-- Certificates -->
+            <div class="section-title right">CHỨNG CHỈ</div>
+            @if (Model?.Certificates?.Any() == true)
+            {
+                var uniqueCertificates = Model.Certificates
+                    .GroupBy(c => new { c.CertificateName, c.IssueBy })
+                    .Select(g => g.OrderByDescending(c => c.IssueDate).First())
+                    .OrderByDescending(c => c.IssueDate);
+                
+                foreach (var cert in uniqueCertificates)
+                {
+                    <div class="certificate-item">
+                        <div class="item-header">
+                            <div class="item-title">
+                                <span class="certificate-icon">🏆</span>@cert.CertificateName
+                            </div>
+                            <div class="item-date">
+                                @if (cert.IssueDate.HasValue)
+                                {
+                                    @cert.IssueDate.Value.ToString("MM/yyyy")
+                                }
+                            </div>
+                        </div>
+                        <div class="item-company">@cert.IssueBy</div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="no-data">Chưa có thông tin chứng chỉ</div>
+            }
+        </div>
+    </div>
+
+    <!-- Print/PDF buttons -->
+    <div style="text-align: center; margin: 20px 0; padding: 20px;">
+        <button onclick="window.print()" style="background: #4a6fa5; color: white; border: none; padding: 12px 24px; border-radius: 5px; margin-right: 10px; cursor: pointer; font-size: 14px;">
+            🖨️ In CV
+        </button>
+        <button onclick="window.close()" style="background: #666; color: white; border: none; padding: 12px 24px; border-radius: 5px; cursor: pointer; font-size: 14px;">
+            ❌ Đóng
+        </button>
+    </div>
+
+    <script>
+        // Auto-adjust skill bars based on number of skills (simple animation)
+        document.addEventListener('DOMContentLoaded', function() {
+            const skillBars = document.querySelectorAll('.skill-progress');
+            const percentages = [85, 90, 80, 75, 88]; // Sample percentages
+            
+            skillBars.forEach((bar, index) => {
+                const percentage = percentages[index % percentages.length];
+                bar.style.width = percentage + '%';
+            });
+        });
+    </script>
+</body>
+</html>

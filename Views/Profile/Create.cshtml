@@ -1,0 +1,636 @@
+@model finder_work.Models.UserProfile
+@{
+    ViewData["Title"] = "Tạo hồ sơ cá nhân";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4><i class="bi bi-person-plus me-2"></i>Tạo hồ sơ cá nhân</h4>
+                    <p class="mb-0">Hoàn thiện thông tin cá nhân và tạo hồ sơ tìm việc chuyên nghiệp</p>
+                </div>
+                <div class="card-body">
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            @Html.Raw(TempData["Error"])
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+                    
+                    @if (TempData["Warning"] != null)
+                    {
+                        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                            @TempData["Warning"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <form asp-action="Create" method="post" enctype="multipart/form-data" id="profileForm">
+                        
+                        <!-- User Information Section -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary border-bottom pb-2">
+                                    <i class="bi bi-person-circle me-2"></i>Thông tin cá nhân
+                                </h5>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="fullName" class="form-label">Họ và tên *</label>
+                                    <input type="text" class="form-control" id="fullName" name="fullName" 
+                                           value="@(ViewBag.CurrentUser?.FullName ?? "")" required
+                                           placeholder="Nhập họ và tên đầy đủ">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="phoneNumber" class="form-label">Số điện thoại *</label>
+                                    <input type="tel" class="form-control" id="phoneNumber" name="phoneNumber" 
+                                           value="@(ViewBag.CurrentUser?.PhoneNumber ?? "")" required
+                                           placeholder="Nhập số điện thoại">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="avatar" class="form-label">Ảnh đại diện</label>
+                                    <input type="file" class="form-control" id="avatar" name="avatar" accept="image/*">
+                                    <div class="form-text">Chấp nhận file .jpg, .jpeg, .png, .gif (tối đa 5MB)</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Profile Information Section -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Summary" class="form-label">Tóm tắt về bản thân *</label>
+                                    <textarea asp-for="Summary" class="form-control" rows="4" required
+                                              placeholder="Mô tả ngắn gọn về kinh nghiệm, kỹ năng và mục tiêu nghề nghiệp..."></textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label asp-for="Location" class="form-label">Địa điểm làm việc *</label>
+                                    <input asp-for="Location" class="form-control" required
+                                           placeholder="VD: Hà Nội, TP.HCM...">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label asp-for="ExpectedSalary" class="form-label">Mức lương mong muốn</label>
+                                    <input asp-for="ExpectedSalary" class="form-control" type="number" min="0"
+                                           placeholder="VD: 15000000">
+                                    <div class="form-text">VND (tùy chọn)</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Skills Section -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary border-bottom pb-2">
+                                    <i class="bi bi-gear-fill me-2"></i>Kỹ năng *
+                                </h5>
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <p class="text-muted mb-0">Chọn các kỹ năng bạn có từ danh sách admin đã tạo</p>
+                                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="addSkill()">
+                                        <i class="bi bi-plus"></i> Thêm kỹ năng
+                                    </button>
+                                </div>
+                                <div id="skillsContainer">
+                                    <!-- Skills will be added here dynamically -->
+                                </div>
+                                <div id="skillError" class="text-danger mt-2" style="display: none;">
+                                    Vui lòng thêm ít nhất 1 kỹ năng
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Professions Section -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary border-bottom pb-2">
+                                    <i class="bi bi-briefcase-fill me-2"></i>Ngành nghề quan tâm *
+                                </h5>
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <p class="text-muted mb-0">Chọn các ngành nghề bạn muốn ứng tuyển từ danh sách admin đã tạo</p>
+                                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="addProfession()">
+                                        <i class="bi bi-plus"></i> Thêm ngành nghề
+                                    </button>
+                                </div>
+                                <div id="professionsContainer">
+                                    <!-- Professions will be added here dynamically -->
+                                </div>
+                                <div id="professionError" class="text-danger mt-2" style="display: none;">
+                                    Vui lòng thêm ít nhất 1 ngành nghề
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Work Experience Section -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary border-bottom pb-2">
+                                    <i class="bi bi-briefcase me-2"></i>Kinh nghiệm làm việc
+                                </h5>
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <p class="text-muted mb-0">Thêm kinh nghiệm làm việc của bạn (tùy chọn)</p>
+                                    <button type="button" class="btn btn-outline-success btn-sm" onclick="addWorkExperience()">
+                                        <i class="bi bi-plus"></i> Thêm kinh nghiệm
+                                    </button>
+                                </div>
+                                <div id="workExperiencesContainer">
+                                    <!-- Work experiences will be added here dynamically -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Education Section -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary border-bottom pb-2">
+                                    <i class="bi bi-mortarboard me-2"></i>Học vấn
+                                </h5>
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <p class="text-muted mb-0">Thêm thông tin học vấn của bạn (tùy chọn)</p>
+                                    <button type="button" class="btn btn-outline-info btn-sm" onclick="addDegree()">
+                                        <i class="bi bi-plus"></i> Thêm bằng cấp
+                                    </button>
+                                </div>
+                                <div id="degreesContainer">
+                                    <!-- Degrees will be added here dynamically -->
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Certificates Section -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary border-bottom pb-2">
+                                    <i class="bi bi-award me-2"></i>Chứng chỉ
+                                </h5>
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <p class="text-muted mb-0">Thêm các chứng chỉ bạn có (tùy chọn)</p>
+                                    <button type="button" class="btn btn-outline-warning btn-sm" onclick="addCertificate()">
+                                        <i class="bi bi-plus"></i> Thêm chứng chỉ
+                                    </button>
+                                </div>
+                                <div id="certificatesContainer">
+                                    <!-- Certificates will be added here dynamically -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="row">
+                            <div class="col-12 text-center">
+                                <button type="submit" class="btn btn-primary btn-lg px-5">
+                                    <i class="bi bi-check-circle me-2"></i>Tạo hồ sơ
+                                </button>
+                                <a href="@Url.Action("Index")" class="btn btn-secondary btn-lg px-5 ms-3">
+                                    <i class="bi bi-arrow-left me-2"></i>Quay lại
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let skillIndex = 0;
+let professionIndex = 0;
+let workExperienceIndex = 0;
+let degreeIndex = 0;
+let certificateIndex = 0;
+// Skills functions - User inputs skill name and selects skill type
+function addSkill() {
+    const container = document.getElementById('skillsContainer');
+    const skillHtml = `
+        <div class="skill-item border rounded p-3 mb-3" data-index="${skillIndex}">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="mb-0">Kỹ năng ${skillIndex + 1}</h6>
+                <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeSkill(${skillIndex})">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <label class="form-label">Tên kỹ năng *</label>
+                    <input type="text" class="form-control" name="skillNames" required
+                           placeholder="VD: JavaScript, Python, Photoshop...">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Loại kỹ năng *</label>
+                    <select class="form-select skilltype-select" name="skillTypeIds" required>
+                        <option value="">-- Chọn loại kỹ năng --</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    `;
+    container.insertAdjacentHTML('beforeend', skillHtml);
+    
+    // Populate skill types dropdown
+    const skillTypeSelect = container.querySelector(`[data-index="${skillIndex}"] .skilltype-select`);
+    populateSkillTypesDropdown(skillTypeSelect);
+    
+    skillIndex++;
+}
+
+function populateSkillTypesDropdown(selectElement) {
+    try {
+        const skillTypes = @Html.Raw(Json.Serialize(ViewBag.SkillTypes ?? new List<object>()));
+        
+        skillTypes.forEach(skillType => {
+            const option = document.createElement('option');
+            option.value = skillType.skillTypeId;
+            option.textContent = skillType.skillTypeName;
+            selectElement.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Error populating skill types dropdown:', error);
+        const option = document.createElement('option');
+        option.value = '';
+        option.textContent = 'Không thể tải danh sách loại kỹ năng';
+        selectElement.appendChild(option);
+    }
+}
+
+function removeSkill(index) {
+    const skillItem = document.querySelector(`[data-index="${index}"].skill-item`);
+    if (skillItem) {
+        skillItem.remove();
+    }
+}
+// Professions functions - User inputs profession name and selects category
+function addProfession() {
+    const container = document.getElementById('professionsContainer');
+    const professionHtml = `
+        <div class="profession-item border rounded p-3 mb-3" data-index="${professionIndex}">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="mb-0">Ngành nghề ${professionIndex + 1}</h6>
+                <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeProfession(${professionIndex})">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <label class="form-label">Tên ngành nghề *</label>
+                    <input type="text" class="form-control" name="professionNames" required
+                           placeholder="VD: Lập trình viên Frontend, Marketing Digital...">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Nhóm ngành *</label>
+                    <select class="form-select category-select" name="categoryIds" required>
+                        <option value="">-- Chọn nhóm ngành --</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    `;
+    container.insertAdjacentHTML('beforeend', professionHtml);
+    
+    // Populate categories dropdown
+    const categorySelect = container.querySelector(`[data-index="${professionIndex}"] .category-select`);
+    populateCategoriesDropdown(categorySelect);
+    
+    professionIndex++;
+}
+
+function populateCategoriesDropdown(selectElement) {
+    try {
+        const categories = @Html.Raw(Json.Serialize(ViewBag.Categories ?? new List<object>()));
+        
+        categories.forEach(category => {
+            const option = document.createElement('option');
+            option.value = category.categoryId;
+            option.textContent = category.categoryName;
+            selectElement.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Error populating categories dropdown:', error);
+        const option = document.createElement('option');
+        option.value = '';
+        option.textContent = 'Không thể tải danh sách nhóm ngành';
+        selectElement.appendChild(option);
+    }
+}
+
+function removeProfession(index) {
+    const professionItem = document.querySelector(`[data-index="${index}"].profession-item`);
+    if (professionItem) {
+        professionItem.remove();
+    }
+}
+// Work Experience functions
+function addWorkExperience() {
+    const container = document.getElementById('workExperiencesContainer');
+    const workExpHtml = `
+        <div class="work-experience-item border rounded p-3 mb-3" data-index="${workExperienceIndex}">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="mb-0">Kinh nghiệm ${workExperienceIndex + 1}</h6>
+                <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeWorkExperience(${workExperienceIndex})">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <label class="form-label">Vị trí công việc *</label>
+                    <input type="text" class="form-control" name="workExperiences[${workExperienceIndex}].WorkName" required
+                           placeholder="VD: Lập trình viên Frontend">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Tên công ty *</label>
+                    <input type="text" class="form-control" name="workExperiences[${workExperienceIndex}].CompanyName" required
+                           placeholder="VD: Công ty ABC">
+                </div>
+                <div class="col-md-6 mt-2">
+                    <label class="form-label">Loại công việc</label>
+                    <select class="form-select worktype-select" name="workExperiences[${workExperienceIndex}].WorkTypeId">
+                        <option value="">-- Chọn loại công việc --</option>
+                    </select>
+                </div>
+                <div class="col-md-6 mt-2">
+                    <label class="form-label">Mô tả công việc</label>
+                    <textarea class="form-control" name="workExperiences[${workExperienceIndex}].WorkDescription" rows="2"
+                              placeholder="Mô tả ngắn gọn về công việc và trách nhiệm..."></textarea>
+                </div>
+                <div class="col-md-6 mt-2">
+                    <label class="form-label">Ngày bắt đầu</label>
+                    <input type="date" class="form-control" name="workExperiences[${workExperienceIndex}].StartDate">
+                </div>
+                <div class="col-md-6 mt-2">
+                    <label class="form-label">Ngày kết thúc</label>
+                    <input type="date" class="form-control" name="workExperiences[${workExperienceIndex}].EndDate">
+                    <div class="form-text">Để trống nếu vẫn đang làm việc</div>
+                </div>
+            </div>
+        </div>
+    `;
+    container.insertAdjacentHTML('beforeend', workExpHtml);
+    
+    // Populate work types dropdown
+    const workTypeSelect = container.querySelector(`[data-index="${workExperienceIndex}"] .worktype-select`);
+    populateWorkTypesDropdown(workTypeSelect);
+    
+    workExperienceIndex++;
+}
+
+function populateWorkTypesDropdown(selectElement) {
+    try {
+        const workTypes = @Html.Raw(Json.Serialize(ViewBag.WorkTypes ?? new List<object>()));
+        
+        workTypes.forEach(workType => {
+            const option = document.createElement('option');
+            option.value = workType.workTypeId;
+            option.textContent = workType.workTypeName;
+            selectElement.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Error populating work types dropdown:', error);
+        const option = document.createElement('option');
+        option.value = '';
+        option.textContent = 'Không thể tải danh sách loại công việc';
+        selectElement.appendChild(option);
+    }
+}
+
+function removeWorkExperience(index) {
+    const workExpItem = document.querySelector(`[data-index="${index}"].work-experience-item`);
+    if (workExpItem) {
+        workExpItem.remove();
+    }
+}
+// Degree functions
+function addDegree() {
+    const container = document.getElementById('degreesContainer');
+    const degreeHtml = `
+        <div class="degree-item border rounded p-3 mb-3" data-index="${degreeIndex}">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="mb-0">Bằng cấp ${degreeIndex + 1}</h6>
+                <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeDegree(${degreeIndex})">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <label class="form-label">Tên bằng cấp *</label>
+                    <input type="text" class="form-control" name="degrees[${degreeIndex}].DegreeName" required
+                           placeholder="VD: Cử nhân Công nghệ thông tin">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Tên trường *</label>
+                    <input type="text" class="form-control" name="degrees[${degreeIndex}].SchoolName" required
+                           placeholder="VD: Đại học Bách khoa Hà Nội">
+                </div>
+                <div class="col-md-4 mt-2">
+                    <label class="form-label">Loại bằng cấp</label>
+                    <select class="form-select degreetype-select" name="degrees[${degreeIndex}].DegreeTypeId">
+                        <option value="">-- Chọn loại bằng cấp --</option>
+                    </select>
+                </div>
+                <div class="col-md-4 mt-2">
+                    <label class="form-label">Chuyên ngành</label>
+                    <input type="text" class="form-control" name="degrees[${degreeIndex}].Major"
+                           placeholder="VD: Công nghệ phần mềm">
+                </div>
+                <div class="col-md-4 mt-2">
+                    <label class="form-label">Năm tốt nghiệp</label>
+                    <input type="number" class="form-control" name="degrees[${degreeIndex}].GraduationYear" 
+                           min="1950" max="2030" placeholder="VD: 2023">
+                </div>
+                <div class="col-md-12 mt-2">
+                    <label class="form-label">Ảnh bằng cấp</label>
+                    <input type="file" class="form-control" name="degrees[${degreeIndex}].DegreeImage" accept="image/*,application/pdf">
+                    <div class="form-text">Tải lên ảnh hoặc PDF bằng cấp</div>
+                </div>
+            </div>
+        </div>
+    `;
+    container.insertAdjacentHTML('beforeend', degreeHtml);
+    
+    // Populate degree types dropdown
+    const degreeTypeSelect = container.querySelector(`[data-index="${degreeIndex}"] .degreetype-select`);
+    populateDegreeTypesDropdown(degreeTypeSelect);
+    
+    degreeIndex++;
+}
+
+function populateDegreeTypesDropdown(selectElement) {
+    try {
+        const degreeTypes = @Html.Raw(Json.Serialize(ViewBag.DegreeTypes ?? new List<object>()));
+        
+        degreeTypes.forEach(degreeType => {
+            const option = document.createElement('option');
+            option.value = degreeType.degreeTypeId;
+            option.textContent = degreeType.degreeTypeName;
+            selectElement.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Error populating degree types dropdown:', error);
+        const option = document.createElement('option');
+        option.value = '';
+        option.textContent = 'Không thể tải danh sách loại bằng cấp';
+        selectElement.appendChild(option);
+    }
+}
+
+function removeDegree(index) {
+    const degreeItem = document.querySelector(`[data-index="${index}"].degree-item`);
+    if (degreeItem) {
+        degreeItem.remove();
+    }
+}
+// Certificate functions
+function addCertificate() {
+    const container = document.getElementById('certificatesContainer');
+    const certificateHtml = `
+        <div class="certificate-item border rounded p-3 mb-3" data-index="${certificateIndex}">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="mb-0">Chứng chỉ ${certificateIndex + 1}</h6>
+                <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeCertificate(${certificateIndex})">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <label class="form-label">Tên chứng chỉ *</label>
+                    <input type="text" class="form-control" name="certificates[${certificateIndex}].CertificateName" required
+                           placeholder="VD: AWS Certified Developer">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Tổ chức cấp *</label>
+                    <input type="text" class="form-control" name="certificates[${certificateIndex}].IssueBy" required
+                           placeholder="VD: Amazon Web Services">
+                </div>
+                <div class="col-md-4 mt-2">
+                    <label class="form-label">Loại chứng chỉ *</label>
+                    <select class="form-select certificatetype-select" name="certificates[${certificateIndex}].CertificateTypeId" required>
+                        <option value="">-- Chọn loại chứng chỉ --</option>
+                    </select>
+                </div>
+                <div class="col-md-4 mt-2">
+                    <label class="form-label">Ngày cấp</label>
+                    <input type="date" class="form-control" name="certificates[${certificateIndex}].IssueDate">
+                </div>
+                <div class="col-md-4 mt-2">
+                    <label class="form-label">Ngày hết hạn</label>
+                    <input type="date" class="form-control" name="certificates[${certificateIndex}].ExpiryDate">
+                    <div class="form-text">Để trống nếu không có hạn</div>
+                </div>
+                <div class="col-md-12 mt-2">
+                    <label class="form-label">Ảnh chứng chỉ</label>
+                    <input type="file" class="form-control" name="certificates[${certificateIndex}].CertificateImage" accept="image/*,application/pdf">
+                    <div class="form-text">Tải lên ảnh hoặc PDF chứng chỉ</div>
+                </div>
+            </div>
+        </div>
+    `;
+    container.insertAdjacentHTML('beforeend', certificateHtml);
+    
+    // Populate certificate types dropdown
+    const certificateTypeSelect = container.querySelector(`[data-index="${certificateIndex}"] .certificatetype-select`);
+    populateCertificateTypesDropdown(certificateTypeSelect);
+    
+    certificateIndex++;
+}
+
+function populateCertificateTypesDropdown(selectElement) {
+    try {
+        const certificateTypes = @Html.Raw(Json.Serialize(ViewBag.CertificateTypes ?? new List<object>()));
+        
+        certificateTypes.forEach(certificateType => {
+            const option = document.createElement('option');
+            option.value = certificateType.certificateTypeId;
+            option.textContent = certificateType.certificateTypeName;
+            selectElement.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Error populating certificate types dropdown:', error);
+        const option = document.createElement('option');
+        option.value = '';
+        option.textContent = 'Không thể tải danh sách loại chứng chỉ';
+        selectElement.appendChild(option);
+    }
+}
+
+function removeCertificate(index) {
+    const certificateItem = document.querySelector(`[data-index="${index}"].certificate-item`);
+    if (certificateItem) {
+        certificateItem.remove();
+    }
+}
+// Form validation
+document.getElementById('profileForm').addEventListener('submit', function(e) {
+    let isValid = true;
+    
+    // Check skills
+    const skillItems = document.querySelectorAll('.skill-item');
+    if (skillItems.length === 0) {
+        document.getElementById('skillError').style.display = 'block';
+        isValid = false;
+    } else {
+        document.getElementById('skillError').style.display = 'none';
+    }
+    
+    // Check professions
+    const professionItems = document.querySelectorAll('.profession-item');
+    if (professionItems.length === 0) {
+        document.getElementById('professionError').style.display = 'block';
+        isValid = false;
+    } else {
+        document.getElementById('professionError').style.display = 'none';
+    }
+    
+    if (!isValid) {
+        e.preventDefault();
+        alert('Vui lòng thêm ít nhất 1 kỹ năng và 1 ngành nghề!');
+    }
+});
+
+// Initialize with one skill and one profession
+document.addEventListener('DOMContentLoaded', function() {
+    // Debug: Check if data is loaded
+    console.log('=== Debugging ViewBag Data ===');
+    try {
+        const skillTypes = @Html.Raw(Json.Serialize(ViewBag.SkillTypes ?? new List<object>()));
+        const categories = @Html.Raw(Json.Serialize(ViewBag.Categories ?? new List<object>()));
+        const workTypes = @Html.Raw(Json.Serialize(ViewBag.WorkTypes ?? new List<object>()));
+        const degreeTypes = @Html.Raw(Json.Serialize(ViewBag.DegreeTypes ?? new List<object>()));
+        const certificateTypes = @Html.Raw(Json.Serialize(ViewBag.CertificateTypes ?? new List<object>()));
+        
+        console.log('SkillTypes loaded:', skillTypes.length, skillTypes);
+        console.log('Categories loaded:', categories.length, categories);
+        console.log('WorkTypes loaded:', workTypes.length, workTypes);
+        console.log('DegreeTypes loaded:', degreeTypes.length, degreeTypes);
+        console.log('CertificateTypes loaded:', certificateTypes.length, certificateTypes);
+    } catch (error) {
+        console.error('Error loading ViewBag data:', error);
+    }
+    
+    addSkill();
+    addProfession();
+});
+</script>
+
+<style>
+.skill-item, .profession-item, .work-experience-item, .degree-item, .certificate-item {
+    background-color: #f8f9fa;
+    transition: all 0.3s ease;
+}
+
+.skill-item:hover, .profession-item:hover, .work-experience-item:hover, .degree-item:hover, .certificate-item:hover {
+    background-color: #e9ecef;
+}
+
+.btn-outline-danger:hover {
+    transform: scale(1.1);
+}
+</style>

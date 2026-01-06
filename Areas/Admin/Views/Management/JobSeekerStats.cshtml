@@ -1,0 +1,494 @@
+@section Sidebar { @await Html.PartialAsync("_AdminSidebar") }
+
+@{
+    ViewData["Title"] = "Thống kê người tìm việc";
+    var stats = ViewBag.Stats;
+    var monthNames = new string[] { "", "Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6", "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12" };
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-graph-up me-2"></i>Thống kê người tìm việc</h2>
+        <a href="@Url.Action("JobProfiles", "Management", new { area = "Admin" })" class="btn btn-secondary">
+            <i class="bi bi-arrow-left me-2"></i>Quay lại quản lý hồ sơ
+        </a>
+    </div>
+
+    @if (stats != null)
+    {
+        <!-- Filter Section -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Bộ lọc thống kê</h6>
+            </div>
+            <div class="card-body">
+                <form method="get" class="row g-3">
+                    <div class="col-md-4">
+                        <label for="year" class="form-label">Năm</label>
+                        <select name="year" id="year" class="form-select">
+                            <option value="">Tất cả các năm</option>
+                            @if (stats != null && stats.AvailableYears != null)
+                            {
+                                @foreach (var availableYear in stats.AvailableYears)
+                                {
+                                    <option value="@availableYear" @(availableYear == (int?)stats.CurrentYear ? "selected" : "")>
+                                        @availableYear
+                                    </option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="month" class="form-label">Tháng</label>
+                        <select name="month" id="month" class="form-select">
+                            <option value="">Tất cả các tháng</option>
+                            @for (int i = 1; i <= 12; i++)
+                            {
+                                <option value="@i" @(i == (int?)stats.CurrentMonth ? "selected" : "")>
+                                    @monthNames[i]
+                                </option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary me-2">
+                            <i class="bi bi-funnel me-1"></i>Lọc
+                        </button>
+                        <a href="@Url.Action("JobSeekerStats", "Management", new { area = "Admin" })" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-clockwise me-1"></i>Đặt lại
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Current Filter Info -->
+        @if (stats != null && ((int?)stats.CurrentYear != DateTime.Now.Year || (int?)stats.CurrentMonth != null))
+        {
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle me-2"></i>
+                Đang hiển thị thống kê cho: 
+                @if ((int?)stats.CurrentMonth != null)
+                {
+                    <strong>@monthNames[(int)stats.CurrentMonth] năm @((int)stats.CurrentYear)</strong>
+                }
+                else if ((int?)stats.CurrentYear != DateTime.Now.Year)
+                {
+                    <strong>Năm @((int)stats.CurrentYear)</strong>
+                }
+            </div>
+        }
+
+        <!-- Overview Statistics -->
+        <div class="row mb-4">
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-primary shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                    Tổng số hồ sơ
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">@(stats?.TotalProfiles ?? 0)</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="bi bi-file-person text-primary" style="font-size: 2rem;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-success shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                    Đã duyệt
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">@(stats?.ApprovedProfiles ?? 0)</div>
+                                <div class="text-xs text-success">
+                                    @((stats?.TotalProfiles ?? 0) > 0 ? Math.Round((double)(stats?.ApprovedProfiles ?? 0) / (stats?.TotalProfiles ?? 1) * 100, 1) : 0)%
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="bi bi-check-circle text-success" style="font-size: 2rem;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-warning shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                    Chờ duyệt
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">@(stats?.PendingProfiles ?? 0)</div>
+                                <div class="text-xs text-warning">
+                                    @((stats?.TotalProfiles ?? 0) > 0 ? Math.Round((double)(stats?.PendingProfiles ?? 0) / (stats?.TotalProfiles ?? 1) * 100, 1) : 0)%
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="bi bi-clock text-warning" style="font-size: 2rem;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-danger shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                    Bị từ chối
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">@(stats?.RejectedProfiles ?? 0)</div>
+                                <div class="text-xs text-danger">
+                                    @((stats?.TotalProfiles ?? 0) > 0 ? Math.Round((double)(stats?.RejectedProfiles ?? 0) / (stats?.TotalProfiles ?? 1) * 100, 1) : 0)%
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="bi bi-x-circle text-danger" style="font-size: 2rem;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="row mb-4">
+            <!-- Monthly Statistics Table -->
+            <div class="col-xl-8 col-lg-7">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-primary">Thống kê theo tháng - Năm @((int?)stats.CurrentYear ?? DateTime.Now.Year)</h6>
+                    </div>
+                    <div class="card-body">
+                        @if (stats.MonthlyStats != null && ((IEnumerable<dynamic>)stats.MonthlyStats).Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Tháng</th>
+                                            <th>Tổng số</th>
+                                            <th>Đã duyệt</th>
+                                            <th>Chờ duyệt</th>
+                                            <th>Bị từ chối</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @{
+                                            var monthlyData = new Dictionary<int, dynamic>();
+                                            if (stats.MonthlyStats != null)
+                                            {
+                                                foreach (var stat in stats.MonthlyStats)
+                                                {
+                                                    monthlyData[stat.Month] = stat;
+                                                }
+                                            }
+                                        }
+                                        @for (int i = 1; i <= 12; i++)
+                                        {
+                                            var monthStat = monthlyData.ContainsKey(i) ? monthlyData[i] : null;
+                                            <tr>
+                                                <td><strong>@monthNames[i]</strong></td>
+                                                <td><span class="badge bg-primary">@(monthStat?.Total ?? 0)</span></td>
+                                                <td><span class="badge bg-success">@(monthStat?.Approved ?? 0)</span></td>
+                                                <td><span class="badge bg-warning">@(monthStat?.Pending ?? 0)</span></td>
+                                                <td><span class="badge bg-danger">@(monthStat?.Rejected ?? 0)</span></td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-center py-4">
+                                <i class="bi bi-calendar-x display-1 text-muted"></i>
+                                <h5 class="text-muted">Chưa có dữ liệu theo tháng</h5>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Yearly Statistics -->
+            <div class="col-xl-4 col-lg-5">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Thống kê theo năm</h6>
+                    </div>
+                    <div class="card-body">
+                        @if (stats.YearlyStats != null && ((IEnumerable<dynamic>)stats.YearlyStats).Any())
+                        {
+                            @foreach (var yearStat in stats.YearlyStats)
+                            {
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <h6 class="mb-0">Năm @yearStat.Year</h6>
+                                        <span class="badge bg-primary">@yearStat.Total</span>
+                                    </div>
+                                    <div class="row text-center">
+                                        <div class="col-4">
+                                            <small class="text-success">@yearStat.Approved</small>
+                                            <br><small class="text-muted">Duyệt</small>
+                                        </div>
+                                        <div class="col-4">
+                                            <small class="text-warning">@yearStat.Pending</small>
+                                            <br><small class="text-muted">Chờ</small>
+                                        </div>
+                                        <div class="col-4">
+                                            <small class="text-danger">@yearStat.Rejected</small>
+                                            <br><small class="text-muted">Từ chối</small>
+                                        </div>
+                                    </div>
+                                    @if (yearStat != ((IEnumerable<dynamic>)stats.YearlyStats).Last())
+                                    {
+                                        <hr>
+                                    }
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="text-center py-4">
+                                <i class="bi bi-calendar-x display-1 text-muted"></i>
+                                <h5 class="text-muted">Chưa có dữ liệu</h5>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Category and Location Statistics -->
+        <div class="row mb-4">
+            <!-- Profiles by Category -->
+            <div class="col-xl-6 col-lg-6">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Top 10 Ngành nghề</h6>
+                    </div>
+                    <div class="card-body">
+                        @if (stats.ProfilesByCategory != null && ((IEnumerable<dynamic>)stats.ProfilesByCategory).Any())
+                        {
+                            @foreach (var item in stats.ProfilesByCategory)
+                            {
+                                var percentage = (stats?.ApprovedProfiles ?? 0) > 0 ? Math.Round((double)item.Count / (stats?.ApprovedProfiles ?? 1) * 100, 1) : 0;
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between">
+                                        <span>@item.Category</span>
+                                        <span class="badge bg-primary">@item.Count (@percentage%)</span>
+                                    </div>
+                                    <div class="progress mt-1" style="height: 8px;">
+                                        <div class="progress-bar bg-primary" role="progressbar" 
+                                             style="width: @percentage%"></div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="text-center py-4">
+                                <i class="bi bi-briefcase display-1 text-muted"></i>
+                                <p class="text-muted">Chưa có dữ liệu ngành nghề</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profiles by Location -->
+            <div class="col-xl-6 col-lg-6">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Top 10 Địa điểm</h6>
+                    </div>
+                    <div class="card-body">
+                        @if (stats.ProfilesByLocation != null && ((IEnumerable<dynamic>)stats.ProfilesByLocation).Any())
+                        {
+                            @foreach (var item in stats.ProfilesByLocation)
+                            {
+                                var percentage = (stats?.ApprovedProfiles ?? 0) > 0 ? Math.Round((double)item.Count / (stats?.ApprovedProfiles ?? 1) * 100, 1) : 0;
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between">
+                                        <span>@item.Location</span>
+                                        <span class="badge bg-info">@item.Count (@percentage%)</span>
+                                    </div>
+                                    <div class="progress mt-1" style="height: 8px;">
+                                        <div class="progress-bar bg-info" role="progressbar" 
+                                             style="width: @percentage%"></div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="text-center py-4">
+                                <i class="bi bi-geo-alt display-1 text-muted"></i>
+                                <p class="text-muted">Chưa có dữ liệu địa điểm</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Salary Statistics -->
+        @if ((stats?.AverageSalary ?? 0) > 0)
+        {
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card shadow">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Thống kê mức lương</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col-md-4">
+                                    <div class="border-right">
+                                        <h3 class="text-success">@((stats?.AverageSalary ?? 0).ToString("N0")) VND</h3>
+                                        <p class="text-muted mb-0">Lương trung bình</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="border-right">
+                                        <h3 class="text-info">@((stats?.MinSalary ?? 0).ToString("N0")) VND</h3>
+                                        <p class="text-muted mb-0">Lương thấp nhất</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <h3 class="text-warning">@((stats?.MaxSalary ?? 0).ToString("N0")) VND</h3>
+                                    <p class="text-muted mb-0">Lương cao nhất</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- Approval Status Pie Chart -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Phân bố trạng thái duyệt</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <canvas id="statusChart" width="400" height="200"></canvas>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="d-flex flex-column justify-content-center h-100">
+                                    <div class="mb-3">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <div class="bg-success rounded me-2" style="width: 20px; height: 20px;"></div>
+                                            <span>Đã duyệt: <strong>@stats.ApprovedProfiles</strong></span>
+                                        </div>
+                                        <div class="d-flex align-items-center mb-2">
+                                            <div class="bg-warning rounded me-2" style="width: 20px; height: 20px;"></div>
+                                            <span>Chờ duyệt: <strong>@stats.PendingProfiles</strong></span>
+                                        </div>
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-danger rounded me-2" style="width: 20px; height: 20px;"></div>
+                                            <span>Bị từ chối: <strong>@stats.RejectedProfiles</strong></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <i class="bi bi-graph-down display-1 text-muted"></i>
+            <h3 class="text-muted">Không có dữ liệu thống kê</h3>
+            <p class="text-muted">Dữ liệu thống kê sẽ hiển thị khi có hồ sơ người tìm việc.</p>
+        </div>
+    }
+</div>
+
+@section Scripts {
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Month filter dependency
+    var yearSelect = document.getElementById('year');
+    var monthSelect = document.getElementById('month');
+    
+    if (yearSelect && monthSelect) {
+        yearSelect.addEventListener('change', function() {
+            if (this.value === '') {
+                monthSelect.disabled = true;
+                monthSelect.value = '';
+            } else {
+                monthSelect.disabled = false;
+            }
+        });
+
+        // Initialize month select state
+        if (yearSelect.value === '') {
+            monthSelect.disabled = true;
+        }
+    }
+});
+</script>
+}
+
+<style>
+.border-left-primary {
+    border-left: 0.25rem solid #4e73df !important;
+}
+
+.border-left-success {
+    border-left: 0.25rem solid #1cc88a !important;
+}
+
+.border-left-warning {
+    border-left: 0.25rem solid #f6c23e !important;
+}
+
+.border-left-danger {
+    border-left: 0.25rem solid #e74a3b !important;
+}
+
+.text-xs {
+    font-size: 0.7rem;
+}
+
+.font-weight-bold {
+    font-weight: 700 !important;
+}
+
+.text-gray-800 {
+    color: #5a5c69 !important;
+}
+
+.bg-gradient-success {
+    background: linear-gradient(87deg, #2dce89 0, #2dcecc 100%) !important;
+}
+
+#statusChart {
+    max-height: 300px;
+}
+
+#monthlyChart {
+    max-height: 400px;
+}
+</style>

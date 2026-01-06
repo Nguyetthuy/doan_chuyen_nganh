@@ -1,0 +1,206 @@
+@model List<finder_work.Models.UserProfile>
+
+@if (Model != null && Model.Any())
+{
+    @foreach (var profile in Model)
+    {
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card profile-card h-100 border-0 shadow-sm">
+                <div class="card-body p-4 d-flex flex-column">
+                    <!-- Profile Header -->
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="profile-avatar me-3">
+                            <div class="avatar-circle bg-primary text-white d-flex align-items-center justify-content-center">
+                                @if (!string.IsNullOrEmpty(profile.User?.FullName))
+                                {
+                                    <span class="fw-bold">@profile.User.FullName.Substring(0, 1).ToUpper()</span>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-person"></i>
+                                }
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h5 class="card-title mb-1">@(profile.User?.FullName ?? "Ẩn danh")</h5>
+                            @if (!string.IsNullOrEmpty(profile.Location))
+                            {
+                                <p class="text-muted small mb-0">
+                                    <i class="bi bi-geo-alt me-1"></i>@profile.Location
+                                </p>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Summary -->
+                    @if (!string.IsNullOrEmpty(profile.Summary))
+                    {
+                        <p class="card-text text-muted mb-3">
+                            @(profile.Summary.Length > 100 ? profile.Summary.Substring(0, 100) + "..." : profile.Summary)
+                        </p>
+                    }
+
+                    <!-- Professions -->
+                    @if (profile.UserProfileProfessions?.Any() == true)
+                    {
+                        <div class="mb-3">
+                            <h6 class="small text-muted mb-2">Nghề nghiệp:</h6>
+                            <div class="d-flex flex-wrap gap-1">
+                                @foreach (var profession in profile.UserProfileProfessions.Take(2))
+                                {
+                                    <span class="badge bg-primary rounded-pill small">
+                                        @profession.Profession?.ProfessionName
+                                    </span>
+                                }
+                                @if (profile.UserProfileProfessions.Count > 2)
+                                {
+                                    <span class="badge bg-secondary rounded-pill small">
+                                        +@(profile.UserProfileProfessions.Count - 2)
+                                    </span>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Skills -->
+                    @if (profile.UserProfileSkills?.Any() == true)
+                    {
+                        <div class="mb-3">
+                            <h6 class="small text-muted mb-2">Kỹ năng:</h6>
+                            <div class="d-flex flex-wrap gap-1">
+                                @foreach (var skill in profile.UserProfileSkills.Take(3))
+                                {
+                                    <span class="badge bg-light text-dark rounded-pill small">
+                                        @skill.Skill?.SkillName
+                                    </span>
+                                }
+                                @if (profile.UserProfileSkills.Count > 3)
+                                {
+                                    <span class="badge bg-secondary rounded-pill small">
+                                        +@(profile.UserProfileSkills.Count - 3)
+                                    </span>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Expected Salary -->
+                    @if (profile.ExpectedSalary.HasValue)
+                    {
+                        <div class="mb-3">
+                            <h6 class="small text-muted mb-1">Mức lương mong muốn:</h6>
+                            <span class="text-success fw-bold">
+                                @profile.ExpectedSalary.Value.ToString("N0") VNĐ
+                            </span>
+                        </div>
+                    }
+
+                    <!-- Action Button -->
+                    <div class="d-grid mt-auto">
+                        <a href="@Url.Action("ProfileDetail", "Home", new { id = profile.ProfileId })" 
+                           class="btn btn-outline-primary">
+                            <i class="bi bi-eye me-2"></i>Xem hồ sơ
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Pagination -->
+    @if (ViewBag.TotalPages > 1)
+    {
+        <div class="col-12">
+            <nav aria-label="Phân trang hồ sơ nổi bật" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <!-- Previous Page -->
+                    <li class="page-item @(ViewBag.HasPreviousPage ? "" : "disabled")">
+                        <a class="page-link" href="#" data-page="@(ViewBag.CurrentPage - 1)" aria-label="Trang trước">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+
+                    <!-- Page Numbers -->
+                    @{
+                        int currentPage = ViewBag.CurrentPage;
+                        int totalPages = ViewBag.TotalPages;
+                        int startPage = Math.Max(1, currentPage - 2);
+                        int endPage = Math.Min(totalPages, currentPage + 2);
+                    }
+
+                    @if (startPage > 1)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="#" data-page="1">1</a>
+                        </li>
+                        @if (startPage > 2)
+                        {
+                            <li class="page-item disabled">
+                                <span class="page-link">...</span>
+                            </li>
+                        }
+                    }
+
+                    @for (int i = startPage; i <= endPage; i++)
+                    {
+                        <li class="page-item @(i == currentPage ? "active" : "")">
+                            <a class="page-link" href="#" data-page="@i">@i</a>
+                        </li>
+                    }
+
+                    @if (endPage < totalPages)
+                    {
+                        @if (endPage < totalPages - 1)
+                        {
+                            <li class="page-item disabled">
+                                <span class="page-link">...</span>
+                            </li>
+                        }
+                        <li class="page-item">
+                            <a class="page-link" href="#" data-page="@totalPages">@totalPages</a>
+                        </li>
+                    }
+
+                    <!-- Next Page -->
+                    <li class="page-item @(ViewBag.HasNextPage ? "" : "disabled")">
+                        <a class="page-link" href="#" data-page="@(ViewBag.CurrentPage + 1)" aria-label="Trang sau">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    }
+}
+else
+{
+    <div class="col-12 text-center py-5">
+        <div class="mb-4">
+            <i class="bi bi-person-x display-1 text-muted"></i>
+        </div>
+        <h4 class="text-muted">Chưa có hồ sơ nào được duyệt</h4>
+        <p class="text-muted">Hãy quay lại sau để xem các hồ sơ ứng viên mới nhất.</p>
+    </div>
+}
+
+<style>
+.avatar-circle {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    font-size: 1.2rem;
+}
+
+.profile-card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.profile-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+}
+
+.badge {
+    font-size: 0.75rem;
+}
+</style>

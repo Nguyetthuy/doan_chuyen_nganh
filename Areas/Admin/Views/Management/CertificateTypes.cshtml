@@ -1,0 +1,169 @@
+@model IEnumerable<finder_work.Models.CertificateType>
+@section Sidebar { @await Html.PartialAsync("_AdminSidebar") }
+
+<div class="container-fluid">
+    <h2>Quản lý loại chứng chỉ</h2>
+    
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Add New Certificate Type Form -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Thêm loại chứng chỉ mới</h5>
+        </div>
+        <div class="card-body">
+            <form action="/Admin/Management/CreateCertificateType" method="post">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="mb-3">
+                            <label for="certificateTypeName" class="form-label">Tên loại chứng chỉ</label>
+                            <input type="text" class="form-control" id="certificateTypeName" name="certificateTypeName" required>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label">&nbsp;</label>
+                            <button type="submit" class="btn btn-primary d-block">Thêm loại chứng chỉ</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Certificate Types List -->
+    <div class="card">
+        <div class="card-header">
+            <h5>Danh sách loại chứng chỉ</h5>
+        </div>
+        <div class="card-body">
+            @if (Model != null && Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Tên loại chứng chỉ</th>
+                                <th>Số lượng chứng chỉ</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var certificateType in Model)
+                            {
+                                <tr>
+                                    <td>@certificateType.CertificateTypeId</td>
+                                    <td>@certificateType.CertificateTypeName</td>
+                                    <td>@certificateType.Certificates.Count</td>
+                                    <td>
+                                        <button type="button" class="btn btn-sm btn-warning me-1" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#editModal@(certificateType.CertificateTypeId)">
+                                            <i class="fas fa-edit"></i> Sửa
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-danger" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#deleteModal@(certificateType.CertificateTypeId)">
+                                            <i class="fas fa-trash"></i> Xóa
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-4">
+                    <p class="text-muted">Chưa có loại chứng chỉ nào được tạo.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Edit and Delete Modals -->
+@if (Model != null && Model.Any())
+{
+    @foreach (var certificateType in Model)
+    {
+        <!-- Edit Modal -->
+        <div class="modal fade" id="editModal@(certificateType.CertificateTypeId)" tabindex="-1" aria-labelledby="editModalLabel@(certificateType.CertificateTypeId)" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editModalLabel@(certificateType.CertificateTypeId)">Sửa loại chứng chỉ</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form action="/Admin/Management/UpdateCertificateType" method="post">
+                        <div class="modal-body">
+                            <input type="hidden" name="certificateTypeId" value="@certificateType.CertificateTypeId" />
+                            <div class="mb-3">
+                                <label for="certificateTypeName@(certificateType.CertificateTypeId)" class="form-label">Tên loại chứng chỉ</label>
+                                <input type="text" class="form-control" id="certificateTypeName@(certificateType.CertificateTypeId)" 
+                                       name="certificateTypeName" value="@certificateType.CertificateTypeName" required>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                            <button type="submit" class="btn btn-primary">Cập nhật</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Modal -->
+        <div class="modal fade" id="deleteModal@(certificateType.CertificateTypeId)" tabindex="-1" aria-labelledby="deleteModalLabel@(certificateType.CertificateTypeId)" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="deleteModalLabel@(certificateType.CertificateTypeId)">Xác nhận xóa</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Bạn có chắc chắn muốn xóa loại chứng chỉ "<strong>@certificateType.CertificateTypeName</strong>" không?</p>
+                        @if (certificateType.Certificates.Count > 0)
+                        {
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                Loại chứng chỉ này có <strong>@certificateType.Certificates.Count</strong> chứng chỉ liên quan. 
+                                Bạn cần xóa các chứng chỉ trước khi xóa loại chứng chỉ này.
+                            </div>
+                        }
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        @if (certificateType.Certificates.Count == 0)
+                        {
+                            <form action="/Admin/Management/DeleteCertificateType" method="post" style="display: inline;">
+                                <input type="hidden" name="certificateTypeId" value="@certificateType.CertificateTypeId" />
+                                <button type="submit" class="btn btn-danger">Xóa</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <button type="button" class="btn btn-danger" disabled>Không thể xóa</button>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+}

@@ -1,0 +1,220 @@
+@model IEnumerable<finder_work.Models.Skill>
+@section Sidebar { @await Html.PartialAsync("_AdminSidebar") }
+
+<div class="container-fluid">
+    <h2>Quản lý kỹ năng</h2>
+    
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Add New Skill Form -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Thêm kỹ năng mới</h5>
+        </div>
+        <div class="card-body">
+            <form action="/Admin/Management/CreateSkill" method="post">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label for="skillName" class="form-label">Tên kỹ năng</label>
+                            <input type="text" class="form-control" id="skillName" name="skillName" required>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label for="skillDescription" class="form-label">Mô tả</label>
+                            <input type="text" class="form-control" id="skillDescription" name="skillDescription">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label for="skillTypeId" class="form-label">Loại kỹ năng</label>
+                            <select class="form-control" id="skillTypeId" name="skillTypeId" required>
+                                <option value="">Chọn loại kỹ năng</option>
+                                @if (ViewBag.SkillTypes != null)
+                                {
+                                    @foreach (var skillType in ViewBag.SkillTypes)
+                                    {
+                                        <option value="@skillType.SkillTypeId">@skillType.SkillTypeName</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="mb-3">
+                            <label class="form-label">&nbsp;</label>
+                            <button type="submit" class="btn btn-primary d-block">Thêm kỹ năng</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Skills List -->
+    <div class="card">
+        <div class="card-header">
+            <h5>Danh sách kỹ năng</h5>
+        </div>
+        <div class="card-body">
+            @if (Model != null && Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Tên kỹ năng</th>
+                                <th>Mô tả</th>
+                                <th>Loại kỹ năng</th>
+                                <th>Số người có kỹ năng</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var skill in Model)
+                            {
+                                <tr>
+                                    <td>@skill.SkillId</td>
+                                    <td>@skill.SkillName</td>
+                                    <td>@skill.SkillDescription</td>
+                                    <td>@skill.SkillType?.SkillTypeName</td>
+                                    <td>@skill.UserProfileSkills.Count</td>
+                                    <td>
+                                        <button type="button" class="btn btn-sm btn-warning me-1" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#editModal@(skill.SkillId)">
+                                            <i class="fas fa-edit"></i> Sửa
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-danger" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#deleteModal@(skill.SkillId)">
+                                            <i class="fas fa-trash"></i> Xóa
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-4">
+                    <p class="text-muted">Chưa có kỹ năng nào được tạo.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Edit and Delete Modals -->
+@if (Model != null && Model.Any())
+{
+    @foreach (var skill in Model)
+    {
+        <!-- Edit Modal -->
+        <div class="modal fade" id="editModal@(skill.SkillId)" tabindex="-1" aria-labelledby="editModalLabel@(skill.SkillId)" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editModalLabel@(skill.SkillId)">Sửa kỹ năng</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form action="/Admin/Management/UpdateSkill" method="post">
+                        <div class="modal-body">
+                            <input type="hidden" name="skillId" value="@skill.SkillId" />
+                            <div class="mb-3">
+                                <label for="skillName@(skill.SkillId)" class="form-label">Tên kỹ năng</label>
+                                <input type="text" class="form-control" id="skillName@(skill.SkillId)" 
+                                       name="skillName" value="@skill.SkillName" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="skillDescription@(skill.SkillId)" class="form-label">Mô tả</label>
+                                <input type="text" class="form-control" id="skillDescription@(skill.SkillId)" 
+                                       name="skillDescription" value="@skill.SkillDescription">
+                            </div>
+                            <div class="mb-3">
+                                <label for="skillTypeId@(skill.SkillId)" class="form-label">Loại kỹ năng</label>
+                                <select class="form-control" id="skillTypeId@(skill.SkillId)" name="skillTypeId" required>
+                                    @if (ViewBag.SkillTypes != null)
+                                    {
+                                        @foreach (var skillType in ViewBag.SkillTypes)
+                                        {
+                                            <option value="@skillType.SkillTypeId" 
+                                                    @(skillType.SkillTypeId == skill.SkillTypeId ? "selected" : "")>
+                                                @skillType.SkillTypeName
+                                            </option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                            <button type="submit" class="btn btn-primary">Cập nhật</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Modal -->
+        <div class="modal fade" id="deleteModal@(skill.SkillId)" tabindex="-1" aria-labelledby="deleteModalLabel@(skill.SkillId)" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="deleteModalLabel@(skill.SkillId)">Xác nhận xóa</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Bạn có chắc chắn muốn xóa kỹ năng "<strong>@skill.SkillName</strong>" không?</p>
+                        @if (skill.UserProfileSkills.Count > 0)
+                        {
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                Kỹ năng này có <strong>@skill.UserProfileSkills.Count</strong> người dùng sở hữu. 
+                                Bạn cần cân nhắc trước khi xóa.
+                            </div>
+                        }
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        @if (skill.UserProfileSkills.Count == 0)
+                        {
+                            <form action="/Admin/Management/DeleteSkill" method="post" style="display: inline;">
+                                <input type="hidden" name="skillId" value="@skill.SkillId" />
+                                <button type="submit" class="btn btn-danger">Xóa</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <form action="/Admin/Management/DeleteSkill" method="post" style="display: inline;">
+                                <input type="hidden" name="skillId" value="@skill.SkillId" />
+                                <button type="submit" class="btn btn-danger" 
+                                        onclick="return confirm('Kỹ năng này có người dùng sở hữu. Bạn có chắc muốn xóa?')">
+                                    Xóa (có rủi ro)
+                                </button>
+                            </form>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+}

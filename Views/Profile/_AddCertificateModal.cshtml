@@ -1,0 +1,88 @@
+@model finder_work.Models.UserProfile
+
+<!-- Add Certificate Modal -->
+<div class="modal fade" id="addCertificateModal" tabindex="-1" aria-labelledby="addCertificateModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addCertificateModalLabel">
+                    <i class="fas fa-certificate"></i> Thêm chứng chỉ
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="AddCertificate" method="post" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <input type="hidden" name="profileId" value="@(Model?.ProfileId ?? 0)" />
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="certificateName" class="form-label">Tên chứng chỉ *</label>
+                                <input type="text" class="form-control" name="certificateName" required 
+                                       placeholder="Ví dụ: AWS Certified Developer">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="certificateTypeId" class="form-label">Loại chứng chỉ *</label>
+                                <select class="form-select" name="certificateTypeId" required>
+                                    <option value="">Chọn loại chứng chỉ</option>
+                                    @if (ViewBag.CertificateTypes != null)
+                                    {
+                                        @foreach (var certType in (List<finder_work.Models.CertificateType>)ViewBag.CertificateTypes)
+                                        {
+                                            <option value="@certType.CertificateTypeId">@certType.CertificateTypeName</option>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <option value="">Không có dữ liệu loại chứng chỉ</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="issueBy" class="form-label">Tổ chức cấp *</label>
+                                <input type="text" class="form-control" name="issueBy" required 
+                                       placeholder="Ví dụ: Amazon Web Services">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="issueDate" class="form-label">Ngày cấp *</label>
+                                <input type="date" class="form-control" name="issueDate" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="expiryDate" class="form-label">Ngày hết hạn</label>
+                                <input type="date" class="form-control" name="expiryDate">
+                                <div class="form-text">Để trống nếu chứng chỉ không có hạn</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="certificateImage" class="form-label">Ảnh chứng chỉ</label>
+                                <input type="file" class="form-control" name="certificateImage" accept="image/*,application/pdf">
+                                <div class="form-text">Tải lên ảnh chứng chỉ (tùy chọn)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-save"></i> Thêm chứng chỉ
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
